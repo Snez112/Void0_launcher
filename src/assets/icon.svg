@@ -1,0 +1,271 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background Gradients -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#141a29" />
+      <stop offset="45%" stop-color="#0a0d16" />
+      <stop offset="100%" stop-color="#040508" />
+    </radialGradient>
+
+    <radialGradient id="coreAura" cx="50%" cy="50%" r="48%">
+      <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.35" />
+      <stop offset="35%" stop-color="#7f00ff" stop-opacity="0.22" />
+      <stop offset="70%" stop-color="#ff007a" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <radialGradient id="centerBurst" cx="50%" cy="50%" r="28%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+      <stop offset="20%" stop-color="#70f3ff" stop-opacity="0.75" />
+      <stop offset="50%" stop-color="#00a8ff" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#002244" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Linear Gradients for Rings & Blades -->
+    <linearGradient id="ringGradLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="40%" stop-color="#4facfe" />
+      <stop offset="80%" stop-color="#6b11ff" />
+      <stop offset="100%" stop-color="#ff007f" />
+    </linearGradient>
+
+    <linearGradient id="ringGradRight" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="30%" stop-color="#00c6ff" />
+      <stop offset="70%" stop-color="#9d4edd" />
+      <stop offset="100%" stop-color="#ff007f" />
+    </linearGradient>
+
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff6cc" />
+      <stop offset="30%" stop-color="#ffd000" />
+      <stop offset="70%" stop-color="#ff8c00" />
+      <stop offset="100%" stop-color="#ff5100" />
+    </linearGradient>
+
+    <linearGradient id="goldGradAlt" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="35%" stop-color="#ffe600" />
+      <stop offset="80%" stop-color="#ff7b00" />
+      <stop offset="100%" stop-color="#e024c3" />
+    </linearGradient>
+
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0ffff" />
+      <stop offset="40%" stop-color="#00f0ff" />
+      <stop offset="100%" stop-color="#0072ff" />
+    </linearGradient>
+
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.8" />
+      <stop offset="25%" stop-color="#7000ff" stop-opacity="0.4" />
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.1" />
+      <stop offset="75%" stop-color="#ffaa00" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#00f2fe" stop-opacity="0.8" />
+    </linearGradient>
+
+    <linearGradient id="metalDark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1f2638" />
+      <stop offset="50%" stop-color="#121724" />
+      <stop offset="100%" stop-color="#0b0e17" />
+    </linearGradient>
+
+    <!-- Filter for Glow -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur1" />
+      <feGaussianBlur stdDeviation="24" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur2" />
+        <feMergeNode in="blur1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="heavyGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="36" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- 1. Base App Icon Container (Squircle) -->
+  <rect x="36" y="36" width="952" height="952" rx="228" fill="url(#bgGlow)" />
+
+  <!-- Outer Tech Border Chamfer -->
+  <rect x="36" y="36" width="952" height="952" rx="228" fill="none" stroke="url(#borderGrad)" stroke-width="4.5" />
+  <rect x="52" y="52" width="920" height="920" rx="212" fill="none" stroke="#00f0ff" stroke-width="1.2" stroke-opacity="0.25" stroke-dasharray="14 10 4 10" />
+
+  <!-- Tech Grid Background Ambient -->
+  <g opacity="0.12">
+    <!-- Concentric radar circles -->
+    <circle cx="512" cy="512" r="380" fill="none" stroke="#00f2fe" stroke-width="1.5" stroke-dasharray="6 8" />
+    <circle cx="512" cy="512" r="290" fill="none" stroke="#7000ff" stroke-width="1" />
+    <circle cx="512" cy="512" r="160" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="4 6" />
+
+    <!-- Crosshair telemetry lines -->
+    <line x1="512" y1="90" x2="512" y2="210" stroke="#00f2fe" stroke-width="2" />
+    <line x1="512" y1="814" x2="512" y2="934" stroke="#00f2fe" stroke-width="2" />
+    <line x1="90" y1="512" x2="210" y2="512" stroke="#00f2fe" stroke-width="2" />
+    <line x1="814" y1="512" x2="934" y2="512" stroke="#00f2fe" stroke-width="2" />
+
+    <!-- Diagonal guide ticks -->
+    <line x1="220" y1="220" x2="260" y2="260" stroke="#00f2fe" stroke-width="2" />
+    <line x1="804" y1="220" x2="764" y2="260" stroke="#00f2fe" stroke-width="2" />
+    <line x1="220" y1="804" x2="260" y2="764" stroke="#00f2fe" stroke-width="2" />
+    <line x1="804" y1="804" x2="764" y2="764" stroke="#00f2fe" stroke-width="2" />
+  </g>
+
+  <!-- Tactical HUD Micro-decals (Endfield / ZZZ aesthetic) -->
+  <g opacity="0.45" fill="#00f2fe">
+    <!-- Top-left bracket -->
+    <path d="M 120 160 L 120 120 L 160 120" fill="none" stroke="#00f2fe" stroke-width="3" />
+    <text x="175" y="132" font-family="'Segoe UI', -apple-system, sans-serif" font-size="16" font-weight="800" letter-spacing="3" fill="#00f2fe">VOID.0 // LAUNCHER</text>
+    <text x="175" y="152" font-family="'Segoe UI', -apple-system, sans-serif" font-size="11" font-weight="600" letter-spacing="2" fill="#8ca0ba">GATEWAY PROTOCOL 01</text>
+
+    <!-- Top-right status marker -->
+    <path d="M 904 160 L 904 120 L 864 120" fill="none" stroke="#ffaa00" stroke-width="3" />
+    <circle cx="830" cy="132" r="4" fill="#00f2fe" />
+    <circle cx="846" cy="132" r="4" fill="#ffd000" />
+    <text x="735" y="136" font-family="'Segoe UI', -apple-system, sans-serif" font-size="13" font-weight="700" letter-spacing="2" fill="#ffd000">SYS:ONLINE</text>
+
+    <!-- Bottom corner brackets -->
+    <path d="M 120 864 L 120 904 L 160 904" fill="none" stroke="#7000ff" stroke-width="3" />
+    <text x="120" y="928" font-family="'Segoe UI', -apple-system, sans-serif" font-size="12" font-weight="700" letter-spacing="4" fill="#6b7c96">DIM-V0//ALLIANCE</text>
+
+    <path d="M 904 864 L 904 904 L 864 904" fill="none" stroke="#00f2fe" stroke-width="3" />
+    <text x="770" y="928" font-family="'Segoe UI', -apple-system, sans-serif" font-size="12" font-weight="700" letter-spacing="3" fill="#6b7c96">HOYO × HYPER</text>
+  </g>
+
+  <!-- Deep Core Aura Glow -->
+  <circle cx="512" cy="512" r="420" fill="url(#coreAura)" />
+
+  <!-- 2. THE VOID "0" DIMENSIONAL ACCELERATOR RING -->
+  <!-- Outer Segmented Ring Glow Underlay -->
+  <g filter="url(#heavyGlow)" opacity="0.75">
+    <ellipse cx="512" cy="512" rx="275" ry="325" fill="none" stroke="url(#ringGradLeft)" stroke-width="38" />
+  </g>
+
+  <!-- Outer Heavy Dark Armored Bezel of the "0" Ring -->
+  <ellipse cx="512" cy="512" rx="288" ry="338" fill="none" stroke="url(#metalDark)" stroke-width="48" />
+
+  <!-- Outer Ring Neon Track (Segmented Arch of the '0') -->
+  <!-- Left Wing of the 0 -->
+  <path d="M 480 188 
+           C 310 200 230 330 230 512 
+           C 230 694 310 824 480 836 
+           L 465 770 
+           C 340 758 290 650 290 512 
+           C 290 374 340 266 465 254 Z"
+        fill="url(#ringGradLeft)" />
+
+  <!-- Right Wing of the 0 -->
+  <path d="M 544 188 
+           C 714 200 794 330 794 512 
+           C 794 694 714 824 544 836 
+           L 559 770 
+           C 684 758 734 650 734 512 
+           C 734 374 684 266 559 254 Z"
+        fill="url(#ringGradRight)" />
+
+  <!-- Tech notches and vents cutting into the "0" -->
+  <g fill="#0b0e17">
+    <!-- Top Notch Aperture -->
+    <polygon points="512,170 488,230 536,230" />
+    <polygon points="512,246 498,280 526,280" />
+    
+    <!-- Bottom Notch Aperture -->
+    <polygon points="512,854 488,794 536,794" />
+    <polygon points="512,778 498,744 526,744" />
+
+    <!-- Lateral Precision Slits -->
+    <rect x="210" y="496" width="35" height="32" rx="4" />
+    <rect x="779" y="496" width="35" height="32" rx="4" />
+  </g>
+
+  <!-- Accent Chamfer Edge Highlights on the '0' Ring -->
+  <path d="M 470 202 C 325 215 250 340 250 512 C 250 684 325 809 470 822" fill="none" stroke="#ffffff" stroke-width="3" stroke-opacity="0.8" />
+  <path d="M 554 202 C 699 215 774 340 774 512 C 774 684 699 809 554 822" fill="none" stroke="#00f2fe" stroke-width="3" stroke-opacity="0.9" />
+
+  <!-- Precision Chevron Arrows around the Ring Perimeter (Endfield/ZZZ HUD style) -->
+  <g fill="#00f2fe" opacity="0.85">
+    <polygon points="200,450 216,462 216,470 200,458" />
+    <polygon points="200,480 216,492 216,500 200,488" />
+    <polygon points="200,544 216,532 216,524 200,536" />
+    <polygon points="200,574 216,562 216,554 200,566" />
+
+    <polygon points="824,450 808,462 808,470 824,458" fill="#ffd000" />
+    <polygon points="824,480 808,492 808,500 824,488" fill="#ffd000" />
+    <polygon points="824,544 808,532 808,524 824,536" fill="#ffd000" />
+    <polygon points="824,574 808,562 808,554 824,566" fill="#ffd000" />
+  </g>
+
+  <!-- 3. INNER DIMENSIONAL CORE / PRIMOGEM & STELLAR WARP STAR -->
+  <!-- Anamorphic Light Beam Flares -->
+  <g opacity="0.85" filter="url(#neonGlow)">
+    <!-- Horizontal Radiant Lens Beam -->
+    <ellipse cx="512" cy="512" rx="420" ry="12" fill="url(#cyanGrad)" opacity="0.6" />
+    <ellipse cx="512" cy="512" rx="280" ry="5" fill="#ffffff" />
+    
+    <!-- Vertical Ethereal Beam -->
+    <ellipse cx="512" cy="512" rx="10" ry="340" fill="url(#goldGrad)" opacity="0.55" />
+    <ellipse cx="512" cy="512" rx="4" ry="220" fill="#ffffff" />
+  </g>
+
+  <!-- Central Star Radial Bloom -->
+  <circle cx="512" cy="512" r="160" fill="url(#centerBurst)" />
+
+  <!-- 4-POINTED GACHA ASTRAL STAR (Faceted Diamond Core) -->
+  <!-- Back Drop / Glow of Core Star -->
+  <polygon points="512,180 542,482 844,512 542,542 512,844 482,542 180,512 482,482" 
+           fill="#00f2fe" opacity="0.4" filter="url(#neonGlow)" />
+
+  <!-- Faceted Prism Star: 8 Precision Geometric Facets -->
+  <!-- Top-North Facet (Golden Light) -->
+  <polygon points="512,210 512,512 470,470" fill="url(#goldGrad)" />
+  <polygon points="512,210 554,470 512,512" fill="url(#goldGradAlt)" />
+
+  <!-- Bottom-South Facet (Void Violet / Magenta) -->
+  <polygon points="512,814 470,554 512,512" fill="url(#ringGradLeft)" />
+  <polygon points="512,814 512,512 554,554" fill="url(#ringGradRight)" />
+
+  <!-- East Facet (Pure Astral Cyan) -->
+  <polygon points="814,512 554,470 512,512" fill="url(#cyanGrad)" />
+  <polygon points="814,512 512,512 554,554" fill="#0099ff" />
+
+  <!-- West Facet (Prismatic White / Cyan Highlight) -->
+  <polygon points="210,512 470,470 512,512" fill="#d4fcff" />
+  <polygon points="210,512 512,512 470,554" fill="#00b4d8" />
+
+  <!-- Center Diamond Rhombus Overlay (White Core Star) -->
+  <polygon points="512,380 592,512 512,644 432,512" fill="#060913" stroke="url(#cyanGrad)" stroke-width="4" />
+  
+  <polygon points="512,410 574,512 512,614 450,512" fill="url(#goldGrad)" opacity="0.9" />
+
+  <!-- Mini 4-Point Spark Core (Hot White Center) -->
+  <polygon points="512,450 526,502 574,512 526,522 512,574 498,522 450,512 498,502" fill="#ffffff" filter="url(#neonGlow)" />
+
+  <!-- 4. FLOATING PRISMATIC ORBITAL SHARDS (Gacha Crystals) -->
+  <!-- Top-Right Orbit Shard -->
+  <g transform="translate(685, 310) rotate(24)">
+    <polygon points="0,-36 14,0 0,36 -14,0" fill="url(#goldGrad)" />
+    <polygon points="0,-36 0,36 14,0" fill="#ffffff" opacity="0.6" />
+  </g>
+
+  <!-- Bottom-Left Orbit Shard -->
+  <g transform="translate(339, 714) rotate(24)">
+    <polygon points="0,-36 14,0 0,36 -14,0" fill="url(#cyanGrad)" />
+    <polygon points="0,-36 0,36 -14,0" fill="#ffffff" opacity="0.7" />
+  </g>
+
+  <!-- Top-Left Mini Accent Star -->
+  <polygon points="350,300 355,315 370,320 355,325 350,340 345,325 330,320 345,315" fill="#ffffff" opacity="0.8" />
+
+  <!-- Bottom-Right Mini Accent Star -->
+  <polygon points="674,704 679,719 694,724 679,729 674,744 669,729 654,724 669,719" fill="#ffd000" opacity="0.85" />
+
+  <!-- Top Glass Highlight Reflection on entire App Icon -->
+  <path d="M 64 64 L 960 64 C 980 64 988 80 988 120 C 720 230 300 230 36 120 C 36 80 44 64 64 64 Z" 
+        fill="#ffffff" opacity="0.06" />
+</svg>

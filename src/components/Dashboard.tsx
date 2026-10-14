@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { HoyoBanner, HoyoPost } from '../types';
+import { getT } from '../i18n/translations';
 
 interface DashboardProps {
   banners: HoyoBanner[];
   posts: HoyoPost[];
   activeBannerIdx: number;
+  language: string;
   onSelectBannerIdx: (idx: number) => void;
 }
 
@@ -12,8 +14,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   banners,
   posts,
   activeBannerIdx,
+  language,
   onSelectBannerIdx,
 }) => {
+  const t = getT(language);
   const [activeNewsTab, setActiveNewsTab] = useState<string>('ALL');
 
   const filteredPosts = posts.filter((post) => {
@@ -58,25 +62,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
             className={`news-tab-btn ${activeNewsTab === 'ALL' ? 'active' : ''}`}
             onClick={() => setActiveNewsTab('ALL')}
           >
-            Tất cả
+            {t.newsAll}
           </button>
           <button
             className={`news-tab-btn ${activeNewsTab === 'ANNOUNCE' ? 'active' : ''}`}
             onClick={() => setActiveNewsTab('ANNOUNCE')}
           >
-            Thông báo
+            {t.newsAnnounce}
           </button>
           <button
             className={`news-tab-btn ${activeNewsTab === 'ACTIVITY' ? 'active' : ''}`}
             onClick={() => setActiveNewsTab('ACTIVITY')}
           >
-            Sự kiện
+            {t.newsActivity}
           </button>
           <button
             className={`news-tab-btn ${activeNewsTab === 'INFO' ? 'active' : ''}`}
             onClick={() => setActiveNewsTab('INFO')}
           >
-            Tin tức
+            {t.newsInfo}
           </button>
         </div>
 
@@ -91,10 +95,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
             >
               <span className="news-item-badge">
                 {post.type === 'POST_TYPE_ANNOUNCE'
-                  ? 'Thông báo'
+                  ? t.newsAnnounce
                   : post.type === 'POST_TYPE_ACTIVITY'
-                  ? 'Sự kiện'
-                  : 'Tin'}
+                  ? t.newsActivity
+                  : t.newsInfo}
               </span>
               <span className="news-item-title" title={post.title}>
                 {post.title}
@@ -104,7 +108,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           ))}
           {filteredPosts.length === 0 && (
             <div style={{ color: 'var(--text-dim)', fontSize: 13, padding: '10px 0' }}>
-              Không có tin tức nào trong mục này.
+              {t.noNews}
             </div>
           )}
         </div>

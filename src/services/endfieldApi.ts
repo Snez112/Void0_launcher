@@ -6,37 +6,52 @@ import {
   HoyoGamePackageResult,
   Region,
 } from '../types';
+import endfieldIcon from '../assets/endfield-icon.svg';
+import endfieldLogo from '../assets/endfield-logo.svg';
 
 export const ENDFIELD_GAME_ID = 'endfield_game_id';
 export const ENDFIELD_BIZ = 'endfield_global';
 
-export const ENDFIELD_GAME_DEF: HoyoGame = {
-  id: ENDFIELD_GAME_ID,
-  biz: ENDFIELD_BIZ,
-  display: {
-    language: 'vi-vn',
-    name: 'Arknights: Endfield',
-    icon: {
-      url: 'https://raw.githubusercontent.com/Yue-plus/endfield_icons/main/svg/endfield-icon-en.svg',
+export function getEndfieldGameDef(language: string): HoyoGame {
+  const isZh = language.toLowerCase().includes('zh');
+  const isVi = language.toLowerCase().includes('vi');
+
+  return {
+    id: ENDFIELD_GAME_ID,
+    biz: ENDFIELD_BIZ,
+    display: {
+      language,
+      name: isZh ? '明日方舟：终末地' : 'Arknights: Endfield',
+      icon: {
+        url: endfieldIcon,
+      },
+      title: isZh ? '明日方舟：终末地' : 'Arknights: Endfield',
+      subtitle: isZh
+        ? '跨越边境，开拓前线'
+        : 'Over the Frontier, Into the Front',
+      background: {
+        url: 'https://gl-utils-public.hg-cdn.com/hg-utils/prod/eppcsuwqpaueijqk/YDUTE5gscDZ229CW/56/db/56dbf737e92191d5414241f5913792cf.webp',
+      },
+      logo: {
+        url: endfieldLogo,
+      },
+      thumbnail: {
+        url: endfieldIcon,
+      },
+      wpf_icon: {
+        url: endfieldIcon,
+      },
+      introduction: isZh
+        ? '《明日方舟：终末地》是鹰角网络自主研发并发行的3D即时策略RPG游戏。'
+        : isVi
+        ? 'Arknights: Endfield là tựa game 3D RPG chiến thuật thời gian thực thế giới mở được phát triển bởi Hypergryph và phát hành toàn cầu bởi GRYPHLINE.'
+        : 'Arknights: Endfield is a real-time tactical 3D RPG developed by Hypergryph and published globally by GRYPHLINE.',
     },
-    title: 'Arknights: Endfield',
-    subtitle: 'Over the Frontier, Into the Front',
-    background: {
-      url: 'https://gl-utils-public.hg-cdn.com/hg-utils/prod/eppcsuwqpaueijqk/YDUTE5gscDZ229CW/56/db/56dbf737e92191d5414241f5913792cf.webp',
-    },
-    logo: {
-      url: 'https://raw.githubusercontent.com/Yue-plus/endfield_icons/main/svg/endfield-logo-en.svg',
-    },
-    thumbnail: {
-      url: 'https://raw.githubusercontent.com/Yue-plus/endfield_icons/main/svg/endfield-icon-en.svg',
-    },
-    wpf_icon: {
-      url: 'https://raw.githubusercontent.com/Yue-plus/endfield_icons/main/svg/endfield-icon-en.svg',
-    },
-    introduction: 'Arknights: Endfield là tựa game 3D RPG chiến thuật thời gian thực thế giới mở được phát triển bởi Hypergryph và phát hành toàn cầu bởi GRYPHLINE.',
-  },
-  display_status: 'DISPLAY_STATUS_NORMAL',
-};
+    display_status: 'DISPLAY_STATUS_NORMAL',
+  };
+}
+
+export const ENDFIELD_GAME_DEF: HoyoGame = getEndfieldGameDef('vi-vn');
 
 // Map regional configurations
 const ENDFIELD_CONFIG = {

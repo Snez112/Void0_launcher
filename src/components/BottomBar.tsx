@@ -1,10 +1,12 @@
 import React from 'react';
 import { Play, FolderOpen, DownloadCloud, Sparkles } from 'lucide-react';
 import { HoyoGamePackageResult } from '../types';
+import { getT } from '../i18n/translations';
 
 interface BottomBarProps {
   packageData: HoyoGamePackageResult | null;
   currentPath: string;
+  language: string;
   onOpenSettings: () => void;
   onOpenPackageModal: () => void;
   onOpenFolder: () => void;
@@ -14,11 +16,13 @@ interface BottomBarProps {
 export const BottomBar: React.FC<BottomBarProps> = ({
   packageData,
   currentPath,
+  language,
   onOpenSettings,
   onOpenPackageModal,
   onOpenFolder,
   onLaunchGame,
 }) => {
+  const t = getT(language);
   const mainPkg = packageData?.main;
   const hasPreDownload = Boolean(
     packageData?.pre_download?.major ||
@@ -30,21 +34,21 @@ export const BottomBar: React.FC<BottomBarProps> = ({
       <div className="bottom-info">
         {mainPkg?.version && (
           <div className="version-pill">
-            <span>Phiên bản: {mainPkg.version}</span>
+            <span>{t.versionPill}: {mainPkg.version}</span>
           </div>
         )}
         <div
           className="path-selector"
           onClick={onOpenSettings}
-          title="Nhấn để cấu hình file chạy"
+          title={t.configPathTip}
         >
           <FolderOpen size={16} />
-          <span>{currentPath ? currentPath : 'Chưa chọn đường dẫn game (.exe)'}</span>
+          <span>{currentPath ? currentPath : t.noPathSelected}</span>
         </div>
       </div>
 
       <div className="bottom-actions">
-        {/* Pre-download button highlight if HoYoverse opens pre-download */}
+        {/* Pre-download button highlight */}
         {hasPreDownload && (
           <button
             className="btn-primary-play"
@@ -55,10 +59,10 @@ export const BottomBar: React.FC<BottomBarProps> = ({
               padding: '10px 16px',
             }}
             onClick={onOpenPackageModal}
-            title="Tải trước bản cập nhật mới ngay từ bây giờ!"
+            title={t.preDownloadTip}
           >
             <Sparkles size={16} />
-            <span>TẢI TRƯỚC</span>
+            <span>{t.preDownloadBtn}</span>
           </button>
         )}
 
@@ -66,11 +70,13 @@ export const BottomBar: React.FC<BottomBarProps> = ({
           <button
             className="btn-secondary"
             onClick={onOpenPackageModal}
-            title="Xem chi tiết gói cài đặt / bản vá"
+            title={t.packagesBtn}
           >
             <DownloadCloud size={16} />
             <span>
-              {hasPreDownload ? 'Các Gói Tải' : `Gói Tải (${mainPkg?.game_pkgs?.length || 0} phần)`}
+              {hasPreDownload
+                ? t.packagesBtn
+                : t.packagesPartsBtn.replace('{count}', String(mainPkg?.game_pkgs?.length || 0))}
             </span>
           </button>
         )}
@@ -79,16 +85,16 @@ export const BottomBar: React.FC<BottomBarProps> = ({
           <button
             className="btn-secondary"
             onClick={onOpenFolder}
-            title="Mở thư mục cài đặt"
+            title={t.openFolderBtn}
           >
             <FolderOpen size={16} />
-            <span>Thư Mục</span>
+            <span>{t.openFolderBtn}</span>
           </button>
         )}
 
         <button className="btn-primary-play" onClick={onLaunchGame}>
           <Play size={20} fill="#111" />
-          <span>{currentPath ? 'BẮT ĐẦU' : 'CHỌN GAME'}</span>
+          <span>{currentPath ? t.launchGameBtn : t.settingsBtn}</span>
         </button>
       </div>
     </div>

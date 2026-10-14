@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#181a20"/>
+      <stop offset="100%" stop-color="#0a0b0d"/>
+    </linearGradient>
+    <linearGradient id="yellowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff14d"/>
+      <stop offset="100%" stop-color="#f5b300"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="url(#bgGrad)"/>
+  <rect x="6" y="6" width="500" height="500" rx="94" fill="none" stroke="#FFE600" stroke-width="6" stroke-opacity="0.35"/>
+
+  <!-- Endfield Industrial Yellow Accent Bar -->
+  <path d="M 90 90 L 140 90 L 110 120 L 90 120 Z" fill="#FFE600"/>
+  <path d="M 125 90 L 175 90 L 145 120 L 125 120 Z" fill="#FFE600" opacity="0.6"/>
+  <path d="M 160 90 L 210 90 L 180 120 L 160 120 Z" fill="#FFE600" opacity="0.3"/>
+
+  <!-- Endfield Triangle Glyph Center -->
+  <g transform="translate(256, 225) scale(0.72)">
+    <!-- Main Triangular Core -->
+    <polygon points="0,-180 160,110 -160,110" fill="none" stroke="url(#yellowGrad)" stroke-width="26" stroke-linejoin="round"/>
+    
+    <!-- Inner Hazard Slash -->
+    <polygon points="0,-110 95,65 -95,65" fill="#FFE600" opacity="0.15"/>
+    <path d="M -50,-10 L 50,-10 L 25,35 L -75,35 Z" fill="#FFE600"/>
+    <path d="M -15,-65 L 15,-65 L -5,-25 L -35,-25 Z" fill="#ffffff"/>
+    
+    <!-- Tech Crosslines -->
+    <line x1="-190" y1="110" x2="190" y2="110" stroke="#FFE600" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="0" cy="110" r="16" fill="#181a20" stroke="#FFE600" stroke-width="8"/>
+  </g>
+
+  <!-- Text "ENDFIELD" -->
+  <text x="256" y="380" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="4">
+    ENDFIELD
+  </text>
+
+  <!-- Bottom Brand Badge (like HoYoverse pill on HoYo icons) -->
+  <path d="M 96 422 L 416 422 C 430 422 440 432 440 446 C 440 460 430 470 416 470 L 96 470 C 82 470 72 460 72 446 C 72 432 82 422 96 422 Z" fill="#000000" fill-opacity="0.85" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+  <text x="256" y="453" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="800" fill="#FFE600" text-anchor="middle" letter-spacing="3">
+    GRYPHLINE
+  </text>
+</svg>

@@ -34,12 +34,14 @@ import { PackageModal } from './components/modals/PackageModal';
 import { RollTrackerModal } from './components/modals/RollTrackerModal';
 import { Gift, Sparkles, MessageSquare, Globe } from 'lucide-react';
 import {
-  ENDFIELD_GAME_DEF,
   ENDFIELD_GAME_ID,
+  getEndfieldGameDef,
   fetchEndfieldBackgrounds,
   fetchEndfieldContent,
   fetchEndfieldPackages,
 } from './services/endfieldApi';
+import { setDiscordPresence, getGameWebIconUrl } from './services/discordApi';
+import { getT } from './i18n/translations';
 import './App.css';
 
 const DEFAULT_CONFIG: AppConfig = {
@@ -96,7 +98,19 @@ export default function App() {
       try {
         const gameList = await fetchGames(config.region, config.language);
         if (!isMounted) return;
-        const allGames = [...gameList, ENDFIELD_GAME_DEF];
+
+        // Prioritize major games at the top
+        const PRIORITY_ORDER = ['nap', 'hkrpg', 'hk4e', 'endfield', 'bh3'];
+        const getPriority = (biz: string) => {
+          const idx = PRIORITY_ORDER.findIndex((prefix) => biz.includes(prefix));
+          return idx !== -1 ? idx : 99;
+        };
+
+        const endfieldDef = getEndfieldGameDef(config.language);
+        const allGames = [...gameList, endfieldDef].sort(
+          (a, b) => getPriority(a.biz) - getPriority(b.biz)
+        );
+
         setGames(allGames);
         if (allGames.length > 0 && !selectedGameId) {
           const zzz = allGames.find(
@@ -162,6 +176,23 @@ export default function App() {
   }, [selectedGameId, config.region, config.language]);
 
   const currentGame = games.find((g) => g.id === selectedGameId);
+  const t = getT(config.language);
+
+  // Update Discord RPC on game switch
+  useEffect(() => {
+    if (!currentGame) return;
+    const gameKey = currentGame.biz || currentGame.display?.name || '';
+    const gameName = currentGame.display?.name || 'Void0 Launcher';
+    const gameIconUrl = getGameWebIconUrl(gameKey, currentGame.display?.icon?.url);
+    setDiscordPresence(
+      config.discordClientId,
+      gameKey,
+      `Browsing ${gameName}`,
+      'In Launcher',
+      gameIconUrl,
+      gameName
+    );
+  }, [selectedGameId, currentGame, config.discordClientId]);
 
   // Check-in info
   const loadCheckin = async (biz: string) => {
@@ -246,6 +277,19 @@ export default function App() {
     }
     try {
       await launchGame(currentPath);
+      if (currentGame) {
+        const gameKey = currentGame.biz || currentGame.display?.name || '';
+        const gameName = currentGame.display?.name || 'Game';
+        const gameIconUrl = getGameWebIconUrl(gameKey, currentGame.display?.icon?.url);
+        setDiscordPresence(
+          config.discordClientId,
+          gameKey,
+          `Playing ${gameName}`,
+          'In Game',
+          gameIconUrl,
+          gameName
+        );
+      }
     } catch (err) {
       alert(`Lỗi khởi động game: ${err}`);
     }
@@ -293,6 +337,7 @@ export default function App() {
         config={config}
         onChangeConfig={setConfig}
         onOpenSettings={() => setShowSettings(true)}
+        currentGame={currentGame}
       />
 
       <div className="launcher-body">
@@ -359,7 +404,7 @@ export default function App() {
                       className="tool-btn"
                     >
                       <Globe size={15} color="#f5b324" />
-                      <span>Trang Chủ</span>
+                      <span>{t.homeWeb}</span>
                     </a>
                     <a
                       href="https://www.skport.com"
@@ -368,7 +413,7 @@ export default function App() {
                       className="tool-btn"
                     >
                       <MessageSquare size={15} color="#38bdf8" />
-                      <span>SKPORT</span>
+                      <span>{t.community}</span>
                     </a>
                   </>
                 ) : (
@@ -377,14 +422,14 @@ export default function App() {
                       type="button"
                       className="tool-btn"
                       onClick={() => setShowCheckinModal(true)}
-                      title="Điểm danh nhận quà trực tiếp trên Launcher"
+                      title={t.dailyCheckinTip}
                     >
                       <Gift size={15} color="#f5b324" />
-                      <span>Điểm Danh</span>
+                      <span>{t.dailyCheckinBtn}</span>
                       {checkinStatus?.is_sign ? (
-                        <span className="checkin-badge done">✓ Đã nhận</span>
+                        <span className="checkin-badge done">{t.checkinDoneBadge}</span>
                       ) : config.cookie ? (
-                        <span className="checkin-badge pending">● Chưa nhận</span>
+                        <span className="checkin-badge pending">{t.checkinPendingBadge}</span>
                       ) : null}
                     </button>
 
@@ -392,10 +437,10 @@ export default function App() {
                       type="button"
                       className="tool-btn"
                       onClick={() => setShowRollModal(true)}
-                      title="Theo dõi lịch sử roll & số nháy Pity từ Database cục bộ"
+                      title={t.rollTrackerTip}
                     >
                       <Sparkles size={15} color="#38bdf8" />
-                      <span>Check Lượt Roll</span>
+                      <span>{t.rollTrackerBtn}</span>
                     </button>
 
                     <a href={links.forum} target="_blank" rel="noreferrer" className="tool-btn">
@@ -412,6 +457,7 @@ export default function App() {
               banners={banners}
               posts={posts}
               activeBannerIdx={activeBannerIdx}
+              language={config.language}
               onSelectBannerIdx={setActiveBannerIdx}
             />
 
@@ -419,6 +465,7 @@ export default function App() {
             <BottomBar
               packageData={packageData}
               currentPath={currentPath}
+              language={config.language}
               onOpenSettings={() => setShowSettings(true)}
               onOpenPackageModal={() => setShowPkgModal(true)}
               onOpenFolder={handleOpenFolder}
@@ -438,6 +485,7 @@ export default function App() {
           checkinLoading={checkinLoading}
           batchLoading={batchLoading}
           checkinMessage={checkinMessage}
+          language={config.language}
           onClose={() => setShowCheckinModal(false)}
           onSaveCookie={(cookie) => {
             setConfig({ ...config, cookie });
@@ -455,17 +503,19 @@ export default function App() {
           currentPath={currentPath}
           region={config.region}
           language={config.language}
+          discordClientId={config.discordClientId}
           onClose={() => setShowSettings(false)}
-          onSave={(path, region, language) => {
+          onSave={(path, region, language, discordClientId) => {
             if (selectedGameId) {
               setConfig({
                 ...config,
                 region,
                 language,
+                discordClientId,
                 gamePaths: { ...config.gamePaths, [selectedGameId]: path },
               });
             } else {
-              setConfig({ ...config, region, language });
+              setConfig({ ...config, region, language, discordClientId });
             }
             setShowSettings(false);
           }}
@@ -475,6 +525,7 @@ export default function App() {
       {showPkgModal && packageData && (
         <PackageModal
           packageData={packageData}
+          language={config.language}
           onClose={() => setShowPkgModal(false)}
         />
       )}
@@ -483,6 +534,7 @@ export default function App() {
         <RollTrackerModal
           currentGame={currentGame}
           gameExePath={currentPath}
+          language={config.language}
           onClose={() => setShowRollModal(false)}
         />
       )}

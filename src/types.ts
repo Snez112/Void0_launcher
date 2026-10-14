@@ -80,6 +80,7 @@ export interface AppConfig {
   gamePaths: Record<string, string>; // game_id -> executable path
   cookie: string; // HoYoLAB Cookie
   autoCheckin: boolean; // Auto check-in on app launch
+  discordClientId?: string; // Optional custom Discord App ID
 }
 
 export interface CheckinStatus {

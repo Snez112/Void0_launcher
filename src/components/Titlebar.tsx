@@ -11,7 +11,8 @@ import {
   ChevronDown,
   Check,
 } from 'lucide-react';
-import { Region, AppConfig } from '../types';
+import { Region, AppConfig, HoyoGame } from '../types';
+import { getT } from '../i18n/translations';
 import {
   windowStartDragging,
   windowMinimize,
@@ -23,12 +24,8 @@ interface TitlebarProps {
   config: AppConfig;
   onChangeConfig: (newConfig: AppConfig) => void;
   onOpenSettings: () => void;
+  currentGame?: HoyoGame;
 }
-
-const REGION_OPTIONS: Array<{ value: Region; label: string }> = [
-  { value: 'os', label: 'Global (HoYoverse)' },
-  { value: 'cn', label: 'China (miHoYo)' },
-];
 
 const LANG_OPTIONS = [
   { value: 'vi-vn', label: 'Tiếng Việt' },
@@ -40,12 +37,27 @@ export const Titlebar: React.FC<TitlebarProps> = ({
   config,
   onChangeConfig,
   onOpenSettings,
+  currentGame,
 }) => {
   const [openRegionMenu, setOpenRegionMenu] = useState(false);
   const [openLangMenu, setOpenLangMenu] = useState(false);
 
   const regionRef = useRef<HTMLDivElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
+
+  const isEndfield =
+    currentGame?.id.includes('endfield') || currentGame?.biz.includes('endfield');
+  const t = getT(config.language);
+
+  const regionOptions = isEndfield
+    ? [
+        { value: 'os' as Region, label: 'Global (GRYPHLINE)' },
+        { value: 'cn' as Region, label: 'China (Hypergryph)' },
+      ]
+    : [
+        { value: 'os' as Region, label: 'Global (HoYoverse)' },
+        { value: 'cn' as Region, label: 'China (miHoYo)' },
+      ];
 
   // Click outside listener
   useEffect(() => {
@@ -68,7 +80,7 @@ export const Titlebar: React.FC<TitlebarProps> = ({
   };
 
   const currentRegionLabel =
-    REGION_OPTIONS.find((r) => r.value === config.region)?.label || 'Server';
+    regionOptions.find((r) => r.value === config.region)?.label || 'Server';
 
   const currentLangLabel =
     LANG_OPTIONS.find((l) => l.value === config.language)?.label || 'Ngôn ngữ';
@@ -76,8 +88,9 @@ export const Titlebar: React.FC<TitlebarProps> = ({
   return (
     <header className="titlebar" data-tauri-drag-region onMouseDown={handleMouseDown}>
       <div className="titlebar-brand" data-tauri-drag-region>
+        <img src="/icon.png" alt="Void0 Logo" className="titlebar-logo" />
         <span>Void0 Launcher</span>
-        <span className="brand-badge">HoyoPlay</span>
+        <span className="brand-badge">{isEndfield ? 'GRYPHLINE' : 'HoyoPlay'}</span>
       </div>
 
       <div className="titlebar-center">
@@ -98,7 +111,7 @@ export const Titlebar: React.FC<TitlebarProps> = ({
 
           {openRegionMenu && (
             <div className="custom-dropdown-menu">
-              {REGION_OPTIONS.map((opt) => (
+              {regionOptions.map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
@@ -154,7 +167,7 @@ export const Titlebar: React.FC<TitlebarProps> = ({
         {/* Sound toggle */}
         <button
           className="win-btn"
-          title={config.soundEnabled ? 'Tắt âm thanh video nền' : 'Bật âm thanh video nền'}
+          title={config.soundEnabled ? t.soundMute : t.soundUnmute}
           onClick={() => onChangeConfig({ ...config, soundEnabled: !config.soundEnabled })}
         >
           {config.soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
@@ -162,16 +175,16 @@ export const Titlebar: React.FC<TitlebarProps> = ({
       </div>
 
       <div className="titlebar-controls">
-        <button className="win-btn" onClick={onOpenSettings} title="Cài đặt">
+        <button className="win-btn" onClick={onOpenSettings} title={t.settingsTitle}>
           <Settings size={15} />
         </button>
-        <button className="win-btn" onClick={windowMinimize} title="Thu nhỏ">
+        <button className="win-btn" onClick={windowMinimize} title={t.minimizeTooltip}>
           <Minus size={15} />
         </button>
-        <button className="win-btn" onClick={windowToggleMaximize} title="Phóng to">
+        <button className="win-btn" onClick={windowToggleMaximize} title={t.maximizeTooltip}>
           <Square size={13} />
         </button>
-        <button className="win-btn close" onClick={windowClose} title="Đóng">
+        <button className="win-btn close" onClick={windowClose} title={t.closeTooltip}>
           <X size={16} />
         </button>
       </div>

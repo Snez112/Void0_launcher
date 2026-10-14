@@ -1,4 +1,5 @@
 pub mod db;
+pub mod discord;
 pub mod gacha;
 
 use std::path::Path;
@@ -166,6 +167,30 @@ fn gacha_get_db_path() -> Result<String, String> {
     Ok(db::get_db_path().to_string_lossy().to_string())
 }
 
+// Discord RPC
+#[tauri::command]
+fn discord_update_presence(
+    custom_client_id: Option<String>,
+    game_name: String,
+    details: String,
+    state: String,
+    large_image: Option<String>,
+    large_text: Option<String>,
+    small_image: Option<String>,
+    small_text: Option<String>,
+) -> Result<(), String> {
+    discord::update_presence(
+        custom_client_id,
+        &game_name,
+        &details,
+        &state,
+        large_image,
+        large_text,
+        small_image,
+        small_text,
+    )
+}
+
 // Window commands
 #[tauri::command]
 fn window_minimize(window: Window) -> Result<(), String> {
@@ -197,6 +222,25 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .setup(|app| {
+            #[cfg(desktop)]
+            {
+                use tauri::Manager;
+                if let Some(window) = app.get_webview_window("main") {
+                    match tauri::image::Image::from_bytes(include_bytes!("../icons/icon.png")) {
+                        Ok(icon) => {
+                            if let Err(e) = window.set_icon(icon) {
+                                eprintln!("Failed to set window icon: {}", e);
+                            } else {
+                                println!("Window icon set successfully");
+                            }
+                        }
+                        Err(e) => eprintln!("Failed to decode icon.png: {}", e),
+                    }
+                }
+            }
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             fetch_hoyo_api,
             launch_game,
@@ -209,6 +253,7 @@ pub fn run() {
             gacha_get_overview,
             gacha_get_cached_url,
             gacha_get_db_path,
+            discord_update_presence,
             window_start_dragging,
             window_minimize,
             window_toggle_maximize,

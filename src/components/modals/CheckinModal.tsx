@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Gift, X, CheckCircle2, Clock, Sparkles, HelpCircle } from 'lucide-react';
 import { HoyoGame, CheckinStatus } from '../../types';
+import { getT } from '../../i18n/translations';
 
 interface CheckinModalProps {
   currentGame?: HoyoGame;
@@ -10,6 +11,7 @@ interface CheckinModalProps {
   checkinLoading: boolean;
   batchLoading: boolean;
   checkinMessage: string;
+  language: string;
   onClose: () => void;
   onSaveCookie: (cookie: string) => void;
   onToggleAutoCheckin: (enabled: boolean) => void;
@@ -25,12 +27,14 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
   checkinLoading,
   batchLoading,
   checkinMessage,
+  language,
   onClose,
   onSaveCookie,
   onToggleAutoCheckin,
   onSingleCheckin,
   onBatchCheckin,
 }) => {
+  const t = getT(language);
   const [cookieInput, setCookieInput] = useState<string>(cookie);
 
   return (
@@ -39,7 +43,7 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Gift size={18} color="#f5b324" />
-            <span>Điểm Danh HoYoLAB Tự Động</span>
+            <span>{t.checkinModalTitle}</span>
           </div>
           <button className="win-btn" onClick={onClose}>
             <X size={16} />
@@ -51,19 +55,19 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
           <div className="checkin-hero">
             <div className="checkin-stats">
               <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                Tiến độ tháng này ({currentGame?.display?.name}):
+                {t.monthlyProgress.replace('{game}', currentGame?.display?.name || '')}:
               </span>
               <div className="checkin-days">
-                {checkinStatus?.total_sign_day ?? 0} <span style={{ fontSize: 14 }}>ngày</span>
+                {checkinStatus?.total_sign_day ?? 0} <span style={{ fontSize: 14 }}>{t.daysUnit}</span>
               </div>
               <div className="checkin-msg">
                 {checkinStatus?.is_sign ? (
                   <span style={{ color: '#4ade80', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <CheckCircle2 size={14} /> Hôm nay đã hoàn tất điểm danh
+                    <CheckCircle2 size={14} /> {t.alreadyCheckedIn}
                   </span>
                 ) : (
                   <span style={{ color: 'var(--accent-yellow)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <Clock size={14} /> Hôm nay chưa điểm danh
+                    <Clock size={14} /> {t.notCheckedInYet}
                   </span>
                 )}
               </div>
@@ -77,7 +81,7 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
                 disabled={checkinLoading || !cookie}
               >
                 <Sparkles size={16} />
-                <span>{checkinLoading ? 'Đang gửi...' : 'Điểm Danh Game Này'}</span>
+                <span>{checkinLoading ? t.checkinSending : t.checkinThisGame}</span>
               </button>
 
               <button
@@ -86,7 +90,7 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
                 disabled={batchLoading || !cookie}
                 style={{ justifyContent: 'center' }}
               >
-                <span>{batchLoading ? 'Đang điểm danh...' : 'Điểm Danh Tất Cả Game'}</span>
+                <span>{batchLoading ? t.checkinSending : t.checkinAllGames}</span>
               </button>
             </div>
           </div>
@@ -114,19 +118,19 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
               checked={autoCheckin}
               onChange={(e) => onToggleAutoCheckin(e.target.checked)}
             />
-            <span>Tự động điểm danh tất cả game mỗi khi mở Launcher</span>
+            <span>{t.autoCheckinLabel}</span>
           </label>
 
           {/* Cookie Setup */}
           <div className="form-group">
             <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span>HoYoLAB Cookie:</span>
+              <span>{t.hoyolabCookieLabel}:</span>
               <HelpCircle size={14} color="var(--text-dim)" />
             </label>
             <input
               type="text"
               className="form-input"
-              placeholder="Dán chuỗi cookie (chứa ltuid_v2, ltoken_v2, ...)"
+              placeholder={t.cookiePlaceholder}
               value={cookieInput}
               onChange={(e) => setCookieInput(e.target.value)}
             />
@@ -134,12 +138,12 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
 
           {/* Cookie Guide */}
           <div className="cookie-guide">
-            <strong>Cách lấy Cookie nhanh (chỉ cần làm 1 lần):</strong>
+            <strong>{t.cookieGuideTitle}</strong>
             <ol style={{ paddingLeft: 18, marginTop: 4 }}>
-              <li>Đăng nhập tài khoản tại <code>hoyolab.com</code> trên trình duyệt.</li>
-              <li>Nhấn phím <code>F12</code> (hoặc chuột phải chọn Kiểm tra) → chọn tab <code>Console</code>.</li>
-              <li>Nhập dòng lệnh: <code>copy(document.cookie)</code> rồi nhấn <code>Enter</code>.</li>
-              <li>Quay lại ô trên, dán (Ctrl + V) và nhấn <strong>Lưu Cookie</strong>.</li>
+              <li>{t.cookieGuideStep1}</li>
+              <li>{t.cookieGuideStep2}</li>
+              <li>{t.cookieGuideStep3}</li>
+              <li>{t.cookieGuideStep4}</li>
             </ol>
           </div>
 
@@ -149,10 +153,10 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
               style={{ padding: '8px 24px', fontSize: 13 }}
               onClick={() => {
                 onSaveCookie(cookieInput.trim());
-                alert('Đã lưu Cookie HoYoLAB thành công!');
+                alert(t.cookieSavedAlert);
               }}
             >
-              Lưu Cookie
+              {t.saveCookieBtn}
             </button>
           </div>
         </div>

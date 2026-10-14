@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { X, FolderOpen } from 'lucide-react';
 import { HoyoGame, Region } from '../../types';
 import { pickGameFile } from '../../services/nativeApi';
+import { getT } from '../../i18n/translations';
 
 interface SettingsModalProps {
   currentGame?: HoyoGame;
   currentPath: string;
   region: Region;
   language: string;
+  discordClientId?: string;
   onClose: () => void;
-  onSave: (path: string, region: Region, language: string) => void;
+  onSave: (path: string, region: Region, language: string, discordClientId?: string) => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -17,12 +19,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   currentPath,
   region,
   language,
+  discordClientId,
   onClose,
   onSave,
 }) => {
+  const t = getT(language);
   const [pathInput, setPathInput] = useState<string>(currentPath);
   const [selectedRegion, setSelectedRegion] = useState<Region>(region);
   const [selectedLanguage, setSelectedLanguage] = useState<string>(language);
+  const [clientIdInput, setClientIdInput] = useState<string>(discordClientId || '');
 
   const handlePickFile = async () => {
     try {
@@ -33,11 +38,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   };
 
+  const isEndfield =
+    currentGame?.id.includes('endfield') || currentGame?.biz.includes('endfield');
+
+  const defaultPlaceholder = isEndfield
+    ? 'D:\\Games\\Endfield\\Beyond.exe'
+    : currentGame?.display?.name
+    ? `D:\\Games\\${currentGame.display.name}\\${currentGame.display.name.replace(/[^a-zA-Z0-9]/g, '')}.exe`
+    : 'D:\\Games\\ZenlessZoneZero Game\\ZenlessZoneZero.exe';
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <span>Cài Đặt Void0 Launcher</span>
+          <span>{t.settingsTitle}</span>
           <button className="win-btn" onClick={onClose}>
             <X size={16} />
           </button>
@@ -46,14 +60,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="modal-body">
           <div className="form-group">
             <label>
-              Đường dẫn tệp thực thi của <strong>{currentGame?.display?.name}</strong> (.exe):
+              {t.exePathLabel.replace('{game}', currentGame?.display?.name || '')}:
             </label>
             <div style={{ display: 'flex', gap: 8 }}>
               <input
                 type="text"
                 className="form-input"
                 style={{ flex: 1 }}
-                placeholder="Ví dụ: D:\Games\ZenlessZoneZero Game\ZenlessZoneZero.exe"
+                placeholder={defaultPlaceholder}
                 value={pathInput}
                 onChange={(e) => setPathInput(e.target.value)}
               />
@@ -61,28 +75,37 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 className="btn-secondary"
                 type="button"
                 onClick={handlePickFile}
-                title="Duyệt tìm tệp .exe trên máy tính"
+                title={t.browseFileBtn}
               >
                 <FolderOpen size={16} />
-                <span>Duyệt File</span>
+                <span>{t.browseFileBtn}</span>
               </button>
             </div>
           </div>
 
           <div className="form-group">
-            <label>Khu vực máy chủ (Server Region):</label>
+            <label>{t.serverRegionLabel}:</label>
             <select
               className="form-input"
               value={selectedRegion}
               onChange={(e) => setSelectedRegion(e.target.value as Region)}
             >
-              <option value="os">Global - HoYoverse (sg-hyp-api.hoyoverse.com)</option>
-              <option value="cn">China - miHoYo (hyp-api.mihoyo.com)</option>
+              {isEndfield ? (
+                <>
+                  <option value="os">Global - GRYPHLINE (launcher.gryphline.com)</option>
+                  <option value="cn">China - Hypergryph (launcher.hypergryph.com)</option>
+                </>
+              ) : (
+                <>
+                  <option value="os">Global - HoYoverse (sg-hyp-api.hoyoverse.com)</option>
+                  <option value="cn">China - miHoYo (hyp-api.mihoyo.com)</option>
+                </>
+              )}
             </select>
           </div>
 
           <div className="form-group">
-            <label>Ngôn ngữ hiển thị nội dung HoYo:</label>
+            <label>{t.contentLangLabel}:</label>
             <select
               className="form-input"
               value={selectedLanguage}
@@ -94,16 +117,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </select>
           </div>
 
+          <div className="form-group">
+            <label>{t.discordClientIdLabel}:</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Ví dụ: 1124154024879456276 (hoặc App ID riêng)"
+              value={clientIdInput}
+              onChange={(e) => setClientIdInput(e.target.value)}
+            />
+            <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 4 }}>
+              {t.discordClientIdTip}
+            </div>
+          </div>
+
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
             <button className="btn-secondary" onClick={onClose}>
-              Hủy
+              {t.cancelBtn}
             </button>
             <button
               className="btn-primary-play"
               style={{ padding: '8px 24px', fontSize: 14 }}
-              onClick={() => onSave(pathInput, selectedRegion, selectedLanguage)}
+              onClick={() => onSave(pathInput, selectedRegion, selectedLanguage, clientIdInput.trim())}
             >
-              Lưu
+              {t.saveBtn}
             </button>
           </div>
         </div>

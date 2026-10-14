@@ -10,6 +10,7 @@ import {
   Folder,
 } from 'lucide-react';
 import { HoyoGame } from '../../types';
+import { getT } from '../../i18n/translations';
 import {
   GachaOverview,
   getGachaOverview,
@@ -21,14 +22,17 @@ import { openFolder } from '../../services/nativeApi';
 interface RollTrackerModalProps {
   currentGame?: HoyoGame;
   gameExePath: string;
+  language: string;
   onClose: () => void;
 }
 
 export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
   currentGame,
   gameExePath,
+  language,
   onClose,
 }) => {
+  const t = getT(language);
   const [activeTab, setActiveTab] = useState<'stats' | 'history' | 'import'>('stats');
   const [overview, setOverview] = useState<GachaOverview | null>(null);
   const [selectedUid, setSelectedUid] = useState<number | null>(null);
@@ -63,15 +67,15 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
   const handleSyncFromCache = async () => {
     if (!biz) return;
     setSyncing(true);
-    setSyncStatus('Đang quét bộ nhớ cache trò chơi...');
+    setSyncStatus(t.scanningCache);
     try {
       const url = await detectGachaCacheUrl(biz, gameExePath);
-      setSyncStatus('Tìm thấy URL gacha! Đang đồng bộ lịch sử roll từ server HoYoverse...');
+      setSyncStatus(t.foundGachaUrl);
       const count = await importGachaRecords(url, biz);
-      setSyncStatus(`Đồng bộ hoàn tất! Đã thêm mới ${count} bản ghi.`);
+      setSyncStatus(t.syncComplete.replace('{count}', String(count)));
       await loadData(selectedUid);
     } catch (err) {
-      setSyncStatus(`Thất bại: ${err}`);
+      setSyncStatus(`${t.syncFailed}: ${err}`);
     } finally {
       setSyncing(false);
     }
@@ -80,14 +84,14 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
   const handleSyncManual = async () => {
     if (!customUrl.trim() || !biz) return;
     setSyncing(true);
-    setSyncStatus('Đang đồng bộ từ link thủ công...');
+    setSyncStatus(t.syncingManual);
     try {
       const count = await importGachaRecords(customUrl.trim(), biz);
-      setSyncStatus(`Đồng bộ hoàn tất! Đã thêm mới ${count} bản ghi.`);
+      setSyncStatus(t.syncComplete.replace('{count}', String(count)));
       setCustomUrl('');
       await loadData(selectedUid);
     } catch (err) {
-      setSyncStatus(`Thất bại: ${err}`);
+      setSyncStatus(`${t.syncFailed}: ${err}`);
     } finally {
       setSyncing(false);
     }
@@ -113,7 +117,7 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Sparkles size={18} color="var(--accent-yellow)" />
             <span>
-              Theo Dõi Lịch Sử Roll (Pity Tracker) - {currentGame?.display?.name}
+              {t.rollTrackerModalTitle} - {currentGame?.display?.name}
             </span>
           </div>
 
@@ -149,21 +153,21 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
             onClick={() => setActiveTab('stats')}
           >
             <Sparkles size={14} />
-            <span>Thống Kê Pity</span>
+            <span>{t.tabStats}</span>
           </button>
           <button
             className={`gacha-tab-btn ${activeTab === 'history' ? 'active' : ''}`}
             onClick={() => setActiveTab('history')}
           >
             <History size={14} />
-            <span>Lịch Sử Chi Tiết</span>
+            <span>{t.tabHistory}</span>
           </button>
           <button
             className={`gacha-tab-btn ${activeTab === 'import' ? 'active' : ''}`}
             onClick={() => setActiveTab('import')}
           >
             <RotateCw size={14} />
-            <span>Đồng Bộ Dữ Liệu</span>
+            <span>{t.tabSync}</span>
           </button>
 
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-dim)' }}>
@@ -172,7 +176,7 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
             <button
               className="win-btn"
               style={{ width: 22, height: 22 }}
-              title="Mở thư mục chứa Database"
+              title="Open database folder"
               onClick={() => {
                 if (overview?.db_path) {
                   const dir = overview.db_path.substring(0, overview.db_path.lastIndexOf('\\'));
@@ -192,7 +196,7 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
             <div className="gacha-stats-view">
               {loading ? (
                 <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
-                  Đang tải dữ liệu...
+                  {t.loadingData}
                 </div>
               ) : overview?.banners && overview.banners.length > 0 ? (
                 <div className="banner-cards-grid">
@@ -200,12 +204,12 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
                     <div key={b.gacha_type} className="banner-stat-card">
                       <div className="banner-stat-header">
                         <span className="banner-title">{b.gacha_name}</span>
-                        <span className="banner-total">{b.total_pulls} lượt roll</span>
+                        <span className="banner-total">{b.total_pulls} {t.pullsUnit}</span>
                       </div>
 
                       <div className="pity-hero">
                         <div className="pity-number-group">
-                          <span className="pity-label">Pity hiện tại:</span>
+                          <span className="pity-label">{t.currentPityLabel}:</span>
                           <span className="pity-count">{b.current_pity}</span>
                           <span className="pity-max">/ 90</span>
                         </div>
@@ -226,14 +230,14 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
                         </div>
                         {b.five_star_count > 0 && (
                           <div className="breakdown-tag" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-muted)' }}>
-                            TB: <strong>{b.average_5.toFixed(1)}</strong> nháy
+                            {t.averageLabel}: <strong>{b.average_5.toFixed(1)}</strong> {t.pullsUnit}
                           </div>
                         )}
                       </div>
 
                       {/* 5-Star History List */}
                       <div className="five-star-history">
-                        <div className="five-star-history-title">Lịch sử 5 sao nhận được:</div>
+                        <div className="five-star-history-title">{t.historyFiveStars}:</div>
                         {b.five_stars.length > 0 ? (
                           <div className="five-star-chips">
                             {b.five_stars.map((item, idx) => (
@@ -250,12 +254,12 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
                                   )}
                                   <span className="item-name">{item.name}</span>
                                 </div>
-                                <span className="item-pity">[{item.pity} nháy]</span>
+                                <span className="item-pity">[{item.pity} {t.pullsUnit}]</span>
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <span className="no-items">Chưa có 5 sao nào trong banner này</span>
+                          <span className="no-items">{t.noFiveStars}</span>
                         )}
                       </div>
                     </div>
@@ -264,17 +268,14 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
               ) : (
                 <div className="empty-gacha-state">
                   <AlertCircle size={36} color="var(--accent-yellow)" />
-                  <h4>Chưa có dữ liệu roll cho tựa game này</h4>
-                  <p>
-                    Vào game mở trang <strong>Lịch Sử Roll</strong>, sau đó nhấn nút{' '}
-                    <strong>Đồng Bộ Dữ Liệu</strong> bên dưới để launcher tự động lấy dữ liệu.
-                  </p>
+                  <h4>{t.noGachaData}</h4>
+                  <p>{t.noGachaHint}</p>
                   <button
                     className="btn-primary-play"
                     style={{ padding: '8px 24px', fontSize: 13, marginTop: 10 }}
                     onClick={() => setActiveTab('import')}
                   >
-                    Đến tab Đồng Bộ Dữ Liệu
+                    {t.goToSyncTab}
                   </button>
                 </div>
               )}
@@ -289,7 +290,7 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
                   className={`news-tab-btn ${selectedBannerType === 'ALL' ? 'active' : ''}`}
                   onClick={() => setSelectedBannerType('ALL')}
                 >
-                  Tất cả Banner
+                  {t.allBanners}
                 </button>
                 {overview?.banners.map((b) => (
                   <button
@@ -306,11 +307,11 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
                 <table className="history-table">
                   <thead>
                     <tr>
-                      <th style={{ width: '170px' }}>Thời gian</th>
-                      <th>Tên vật phẩm</th>
-                      <th style={{ width: '110px' }}>Loại</th>
-                      <th style={{ width: '80px', textAlign: 'center' }}>Độ hiếm</th>
-                      <th style={{ width: '90px', textAlign: 'center' }}>Vị trí Pity</th>
+                      <th style={{ width: '170px' }}>{t.thTime}</th>
+                      <th>{t.thItemName}</th>
+                      <th style={{ width: '110px' }}>{t.thType}</th>
+                      <th style={{ width: '80px', textAlign: 'center' }}>{t.thRarity}</th>
+                      <th style={{ width: '90px', textAlign: 'center' }}>{t.thPityPos}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -372,7 +373,7 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
                     {filteredHistory.length === 0 && (
                       <tr>
                         <td colSpan={5} style={{ textAlign: 'center', padding: '30px', color: 'var(--text-dim)' }}>
-                          Chưa có lịch sử roll nào.
+                          {t.noHistoryRows}
                         </td>
                       </tr>
                     )}
@@ -386,11 +387,11 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
           {activeTab === 'import' && (
             <div className="gacha-import-view">
               <div className="sync-section-card">
-                <h3>Cách 1: Tự Động Quét Cache Game (Khuyên Dùng)</h3>
+                <h3>{t.syncMethod1Title}</h3>
                 <p>
-                  1. Mở game ({currentGame?.display?.name}) lên.<br />
-                  2. Vào mục Gacha/Cầu Nguyện → bấm xem <strong>Lịch Sử</strong> (hoặc Chi Tiết).<br />
-                  3. Sau đó bấm nút dưới đây, Launcher sẽ tự trích xuất URL và tải toàn bộ lượt roll vào database Starward:
+                  1. {t.syncMethod1Step1.replace('{game}', currentGame?.display?.name || '')}<br />
+                  2. {t.syncMethod1Step2}<br />
+                  3. {t.syncMethod1Step3}
                 </p>
 
                 <button
@@ -400,14 +401,14 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
                   disabled={syncing}
                 >
                   <RotateCw size={15} className={syncing ? 'spinning' : ''} />
-                  <span>{syncing ? 'Đang đọc cache...' : 'Tự Động Đọc Cache & Đồng Bộ'}</span>
+                  <span>{syncing ? t.syncingManual : t.btnSyncFromCache}</span>
                 </button>
               </div>
 
               <div className="sync-section-card" style={{ marginTop: 16 }}>
-                <h3>Cách 2: Dán Link Gacha Thủ Công</h3>
+                <h3>{t.syncMethod2Title}</h3>
                 <p>
-                  Nếu cách tự động không tìm được file cache, bạn có thể dán trực tiếp đường link lấy từ Powershell hoặc game vào đây:
+                  {t.syncMethod2Desc}
                 </p>
 
                 <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
@@ -423,7 +424,7 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
                     onClick={handleSyncManual}
                     disabled={syncing || !customUrl.trim()}
                   >
-                    Đồng Bộ Link
+                    {t.btnSyncManual}
                   </button>
                 </div>
               </div>
@@ -434,11 +435,11 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
                     marginTop: 16,
                     padding: '12px 16px',
                     borderRadius: 8,
-                    background: syncStatus.includes('Thất bại')
+                    background: syncStatus.includes('Thất bại') || syncStatus.includes('Failed')
                       ? 'rgba(239, 68, 68, 0.15)'
                       : 'rgba(245, 179, 36, 0.15)',
                     border: `1px solid ${
-                      syncStatus.includes('Thất bại')
+                      syncStatus.includes('Thất bại') || syncStatus.includes('Failed')
                         ? 'rgba(239, 68, 68, 0.3)'
                         : 'rgba(245, 179, 36, 0.3)'
                     }`,
@@ -453,13 +454,10 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
               <div className="cookie-guide" style={{ marginTop: 16 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                   <HelpCircle size={15} color="var(--accent-yellow)" />
-                  <strong>Đặc tả lưu trữ dữ liệu Database:</strong>
+                  <strong>{t.dbSpecTitle}</strong>
                 </div>
                 <span>
-                  Toàn bộ dữ liệu được lưu cục bộ trong file SQLite chuẩn Starward:{' '}
-                  <code>{overview?.db_path}</code>.<br />
-                  Tương thích hoàn toàn với các bảng <code>GenshinGachaItem</code>,{' '}
-                  <code>StarRailGachaItem</code>, <code>ZZZGachaItem</code> và <code>GachaLogUrl</code>.
+                  {t.dbSpecDesc} <code>{overview?.db_path}</code>.
                 </span>
               </div>
             </div>

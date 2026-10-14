@@ -17,6 +17,7 @@ struct HoyoGachaData {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct HoyoRawRecord {
     id: String,
     uid: String,

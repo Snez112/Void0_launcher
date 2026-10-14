@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 120" width="600" height="120">
+  <defs>
+    <linearGradient id="logoYellow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFF04B"/>
+      <stop offset="100%" stop-color="#FFE600"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Left Icon Mark -->
+  <g transform="translate(60, 60) scale(0.3)">
+    <polygon points="0,-150 130,85 -130,85" fill="none" stroke="url(#logoYellow)" stroke-width="28" stroke-linejoin="round"/>
+    <path d="M -40,-10 L 40,-10 L 20,30 L -60,30 Z" fill="#FFE600"/>
+    <line x1="-160" y1="85" x2="160" y2="85" stroke="#FFE600" stroke-width="16" stroke-linecap="round"/>
+  </g>
+
+  <!-- Title Text -->
+  <text x="135" y="58" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="900" fill="#FFE600" letter-spacing="6">
+    ARKNIGHTS
+  </text>
+  <text x="135" y="98" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="40" font-weight="900" fill="#FFFFFF" letter-spacing="4">
+    ENDFIELD
+  </text>
+</svg>

@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
 import { X, ExternalLink, Sparkles, Download, Layers } from 'lucide-react';
 import { HoyoGamePackageResult } from '../../types';
+import { getT } from '../../i18n/translations';
 
 interface PackageModalProps {
   packageData: HoyoGamePackageResult;
+  language: string;
   onClose: () => void;
 }
 
-export const PackageModal: React.FC<PackageModalProps> = ({ packageData, onClose }) => {
-  const hasPre = Boolean(packageData.pre_download?.major || (packageData.pre_download?.patches && packageData.pre_download.patches.length > 0));
+export const PackageModal: React.FC<PackageModalProps> = ({ packageData, language, onClose }) => {
+  const t = getT(language);
+  const hasPre = Boolean(
+    packageData.pre_download?.major ||
+    (packageData.pre_download?.patches && packageData.pre_download.patches.length > 0)
+  );
   const [selectedTab, setSelectedTab] = useState<'main' | 'pre' | 'patch'>(hasPre ? 'pre' : 'main');
 
   const currentPkg = selectedTab === 'pre'
@@ -26,7 +32,7 @@ export const PackageModal: React.FC<PackageModalProps> = ({ packageData, onClose
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Download size={18} color="var(--accent-yellow)" />
             <span>
-              {hasPre ? 'Tải Trước Bản Cập Nhật & Gói Cài Đặt' : 'Gói Cài Đặt Game Chính Thức'}
+              {hasPre ? t.pkgModalPreTitle : t.pkgModalTitle}
             </span>
           </div>
           <button className="win-btn" onClick={onClose}>
@@ -43,7 +49,12 @@ export const PackageModal: React.FC<PackageModalProps> = ({ packageData, onClose
               style={{ color: selectedTab === 'pre' ? '#111' : '#38bdf8' }}
             >
               <Sparkles size={14} />
-              <span>Tải Trước (Pre-download v{packageData.pre_download?.major?.version || packageData.pre_download?.patches?.[0]?.version})</span>
+              <span>
+                {t.preDownloadTab.replace(
+                  '{version}',
+                  packageData.pre_download?.major?.version || packageData.pre_download?.patches?.[0]?.version || ''
+                )}
+              </span>
             </button>
           )}
 
@@ -52,7 +63,7 @@ export const PackageModal: React.FC<PackageModalProps> = ({ packageData, onClose
             onClick={() => setSelectedTab('main')}
           >
             <Download size={14} />
-            <span>Bản Đầy Đủ Hiện Tại (v{packageData.main?.version})</span>
+            <span>{t.fullGameTab.replace('{version}', packageData.main?.version || '')}</span>
           </button>
 
           {patches.length > 0 && (
@@ -61,7 +72,7 @@ export const PackageModal: React.FC<PackageModalProps> = ({ packageData, onClose
               onClick={() => setSelectedTab('patch')}
             >
               <Layers size={14} />
-              <span>Bản Vá Cũ Hơn ({patches.length})</span>
+              <span>{t.olderPatchesTab.replace('{count}', String(patches.length))}</span>
             </button>
           )}
         </div>
@@ -70,18 +81,22 @@ export const PackageModal: React.FC<PackageModalProps> = ({ packageData, onClose
           {selectedTab === 'patch' ? (
             <div className="pkg-list">
               <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>
-                Các gói vá (Patch / HDiff) nâng cấp từ các phiên bản cũ lên phiên bản mới:
+                {t.patchesNotice}
               </div>
               {patches.map((p, pIdx) => (
                 <div key={pIdx} style={{ marginBottom: 12 }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent-yellow)', marginBottom: 4 }}>
-                    Vá lên v{p.version}:
+                    {t.patchToVersion.replace('{version}', p.version)}
                   </div>
                   {p.game_pkgs.map((pkg, idx) => (
                     <div key={idx} className="pkg-item">
-                      <span>Phần {idx + 1} ({(Number(pkg.size) / (1024 * 1024 * 1024)).toFixed(2)} GB)</span>
+                      <span>
+                        {t.gamePart
+                          .replace('{index}', String(idx + 1))
+                          .replace('{size}', (Number(pkg.size) / (1024 * 1024 * 1024)).toFixed(2))}
+                      </span>
                       <a href={pkg.url} target="_blank" rel="noreferrer">
-                        Tải Patch <ExternalLink size={12} style={{ verticalAlign: 'middle' }} />
+                        {t.downloadPatchBtn} <ExternalLink size={12} style={{ verticalAlign: 'middle' }} />
                       </a>
                     </div>
                   ))}
@@ -93,10 +108,10 @@ export const PackageModal: React.FC<PackageModalProps> = ({ packageData, onClose
               <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 10 }}>
                 {selectedTab === 'pre' ? (
                   <span style={{ color: '#38bdf8' }}>
-                    ✦ Nhà phát hành đã mở tính năng <strong>Tải Trước</strong>! Bạn có thể tải trước toàn bộ tài nguyên bản vá để khi server bảo trì xong là vào chơi ngay.
+                    {t.preDownloadNotice}
                   </span>
                 ) : (
-                  <span>Đường dẫn tải trực tiếp từ CDN chính chủ của nhà phát hành (Phiên bản {currentPkg.version}):</span>
+                  <span>{t.directCdnNotice.replace('{version}', currentPkg.version)}</span>
                 )}
               </div>
 
@@ -104,11 +119,12 @@ export const PackageModal: React.FC<PackageModalProps> = ({ packageData, onClose
                 {currentPkg.game_pkgs.map((pkg, idx) => (
                   <div key={idx} className="pkg-item">
                     <span>
-                      {selectedTab === 'pre' ? 'Tài nguyên tải trước' : 'Gói Game'} phần {idx + 1} (
-                      {(Number(pkg.size) / (1024 * 1024 * 1024)).toFixed(2)} GB)
+                      {t.gamePart
+                        .replace('{index}', String(idx + 1))
+                        .replace('{size}', (Number(pkg.size) / (1024 * 1024 * 1024)).toFixed(2))}
                     </span>
                     <a href={pkg.url} target="_blank" rel="noreferrer">
-                      Tải File <ExternalLink size={12} style={{ verticalAlign: 'middle' }} />
+                      {t.downloadFileBtn} <ExternalLink size={12} style={{ verticalAlign: 'middle' }} />
                     </a>
                   </div>
                 ))}
@@ -116,10 +132,12 @@ export const PackageModal: React.FC<PackageModalProps> = ({ packageData, onClose
                 {currentPkg.audio_pkgs.map((audio, idx) => (
                   <div key={`audio-${idx}`} className="pkg-item">
                     <span>
-                      Gói âm thanh ({audio.language}) - {(Number(audio.size) / (1024 * 1024 * 1024)).toFixed(2)} GB
+                      {t.audioPart
+                        .replace('{lang}', audio.language)
+                        .replace('{size}', (Number(audio.size) / (1024 * 1024 * 1024)).toFixed(2))}
                     </span>
                     <a href={audio.url} target="_blank" rel="noreferrer">
-                      Tải Audio <ExternalLink size={12} style={{ verticalAlign: 'middle' }} />
+                      {t.downloadAudioBtn} <ExternalLink size={12} style={{ verticalAlign: 'middle' }} />
                     </a>
                   </div>
                 ))}
@@ -127,7 +145,7 @@ export const PackageModal: React.FC<PackageModalProps> = ({ packageData, onClose
             </div>
           ) : (
             <div style={{ padding: '30px 0', textAlign: 'center', color: 'var(--text-dim)' }}>
-              Hiện chưa có tài nguyên tải trước cho tựa game này.
+              {t.noPreDownloadNotice}
             </div>
           )}
         </div>
