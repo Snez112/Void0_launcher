@@ -93,10 +93,10 @@ export const PackageModal: React.FC<PackageModalProps> = ({ packageData, onClose
               <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 10 }}>
                 {selectedTab === 'pre' ? (
                   <span style={{ color: '#38bdf8' }}>
-                    ✦ HoYoverse đã mở tính năng <strong>Tải Trước</strong>! Bạn có thể tải trước toàn bộ tài nguyên bản vá để khi server bảo trì xong là vào chơi ngay.
+                    ✦ Nhà phát hành đã mở tính năng <strong>Tải Trước</strong>! Bạn có thể tải trước toàn bộ tài nguyên bản vá để khi server bảo trì xong là vào chơi ngay.
                   </span>
                 ) : (
-                  <span>Đường dẫn tải trực tiếp từ CDN chính chủ của HoYoverse (Phiên bản {currentPkg.version}):</span>
+                  <span>Đường dẫn tải trực tiếp từ CDN chính chủ của nhà phát hành (Phiên bản {currentPkg.version}):</span>
                 )}
               </div>
 

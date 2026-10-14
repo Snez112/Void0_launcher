@@ -32,7 +32,14 @@ import { CheckinModal } from './components/modals/CheckinModal';
 import { SettingsModal } from './components/modals/SettingsModal';
 import { PackageModal } from './components/modals/PackageModal';
 import { RollTrackerModal } from './components/modals/RollTrackerModal';
-import { Gift, Sparkles, MessageSquare } from 'lucide-react';
+import { Gift, Sparkles, MessageSquare, Globe } from 'lucide-react';
+import {
+  ENDFIELD_GAME_DEF,
+  ENDFIELD_GAME_ID,
+  fetchEndfieldBackgrounds,
+  fetchEndfieldContent,
+  fetchEndfieldPackages,
+} from './services/endfieldApi';
 import './App.css';
 
 const DEFAULT_CONFIG: AppConfig = {
@@ -89,12 +96,13 @@ export default function App() {
       try {
         const gameList = await fetchGames(config.region, config.language);
         if (!isMounted) return;
-        setGames(gameList);
-        if (gameList.length > 0) {
-          const zzz = gameList.find(
+        const allGames = [...gameList, ENDFIELD_GAME_DEF];
+        setGames(allGames);
+        if (allGames.length > 0 && !selectedGameId) {
+          const zzz = allGames.find(
             (g) => g.biz.includes('nap') || g.display?.name?.toLowerCase().includes('zenless')
           );
-          setSelectedGameId(zzz ? zzz.id : gameList[0].id);
+          setSelectedGameId(zzz ? zzz.id : allGames[0].id);
         }
       } catch (err) {
         console.error('Lỗi tải danh sách game:', err);
@@ -113,10 +121,24 @@ export default function App() {
     let isMounted = true;
     async function loadDetails() {
       try {
+        let bgPromise: Promise<HoyoBackground[]>;
+        let contentPromise: Promise<{ banners: HoyoBanner[]; posts: HoyoPost[] }>;
+        let pkgPromise: Promise<HoyoGamePackageResult>;
+
+        if (selectedGameId === ENDFIELD_GAME_ID) {
+          bgPromise = fetchEndfieldBackgrounds(config.region, config.language);
+          contentPromise = fetchEndfieldContent(config.region, config.language);
+          pkgPromise = fetchEndfieldPackages(config.region);
+        } else {
+          bgPromise = fetchGameBackgrounds(config.region, config.language, selectedGameId);
+          contentPromise = fetchGameContent(config.region, config.language, selectedGameId);
+          pkgPromise = fetchGamePackages(config.region, config.language, selectedGameId);
+        }
+
         const [bgRes, contentRes, pkgRes] = await Promise.allSettled([
-          fetchGameBackgrounds(config.region, config.language, selectedGameId),
-          fetchGameContent(config.region, config.language, selectedGameId),
-          fetchGamePackages(config.region, config.language, selectedGameId),
+          bgPromise,
+          contentPromise,
+          pkgPromise,
         ]);
 
         if (!isMounted) return;
@@ -148,7 +170,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (currentGame?.biz && config.cookie) {
+    if (currentGame?.biz && currentGame.id !== ENDFIELD_GAME_ID && config.cookie) {
       loadCheckin(currentGame.biz);
     } else {
       setCheckinStatus(null);
@@ -306,7 +328,14 @@ export default function App() {
             {/* Header info & tools */}
             <div className="game-header">
               <div className="game-title-group">
-                {currentBg?.theme?.url ? (
+                {currentGame?.id === ENDFIELD_GAME_ID && currentGame.display?.logo?.url ? (
+                  <img
+                    className="game-logo"
+                    src={currentGame.display.logo.url}
+                    alt={currentGame.display?.name}
+                    style={{ maxWidth: 280, height: 'auto', marginBottom: 8 }}
+                  />
+                ) : currentBg?.theme?.url ? (
                   <img
                     className="game-logo"
                     src={currentBg.theme.url}
@@ -321,35 +350,60 @@ export default function App() {
               </div>
 
               <div className="quick-tools">
-                <button
-                  type="button"
-                  className="tool-btn"
-                  onClick={() => setShowCheckinModal(true)}
-                  title="Điểm danh nhận quà trực tiếp trên Launcher"
-                >
-                  <Gift size={15} color="#f5b324" />
-                  <span>Điểm Danh</span>
-                  {checkinStatus?.is_sign ? (
-                    <span className="checkin-badge done">✓ Đã nhận</span>
-                  ) : config.cookie ? (
-                    <span className="checkin-badge pending">● Chưa nhận</span>
-                  ) : null}
-                </button>
+                {currentGame?.id === ENDFIELD_GAME_ID ? (
+                  <>
+                    <a
+                      href="https://endfield.gryphline.com"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="tool-btn"
+                    >
+                      <Globe size={15} color="#f5b324" />
+                      <span>Trang Chủ</span>
+                    </a>
+                    <a
+                      href="https://www.skport.com"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="tool-btn"
+                    >
+                      <MessageSquare size={15} color="#38bdf8" />
+                      <span>SKPORT</span>
+                    </a>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      className="tool-btn"
+                      onClick={() => setShowCheckinModal(true)}
+                      title="Điểm danh nhận quà trực tiếp trên Launcher"
+                    >
+                      <Gift size={15} color="#f5b324" />
+                      <span>Điểm Danh</span>
+                      {checkinStatus?.is_sign ? (
+                        <span className="checkin-badge done">✓ Đã nhận</span>
+                      ) : config.cookie ? (
+                        <span className="checkin-badge pending">● Chưa nhận</span>
+                      ) : null}
+                    </button>
 
-                <button
-                  type="button"
-                  className="tool-btn"
-                  onClick={() => setShowRollModal(true)}
-                  title="Theo dõi lịch sử roll & số nháy Pity từ Database cục bộ"
-                >
-                  <Sparkles size={15} color="#38bdf8" />
-                  <span>Check Lượt Roll</span>
-                </button>
+                    <button
+                      type="button"
+                      className="tool-btn"
+                      onClick={() => setShowRollModal(true)}
+                      title="Theo dõi lịch sử roll & số nháy Pity từ Database cục bộ"
+                    >
+                      <Sparkles size={15} color="#38bdf8" />
+                      <span>Check Lượt Roll</span>
+                    </button>
 
-                <a href={links.forum} target="_blank" rel="noreferrer" className="tool-btn">
-                  <MessageSquare size={15} color="#f472b6" />
-                  <span>HoYoLAB</span>
-                </a>
+                    <a href={links.forum} target="_blank" rel="noreferrer" className="tool-btn">
+                      <MessageSquare size={15} color="#f472b6" />
+                      <span>HoYoLAB</span>
+                    </a>
+                  </>
+                )}
               </div>
             </div>
 
