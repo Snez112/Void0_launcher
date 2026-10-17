@@ -1,26 +1,26 @@
 import { invoke } from '@tauri-apps/api/core';
 
+export const DEFAULT_LAUNCHER_ICON_URL =
+  'https://cdn.discordapp.com/app-icons/1560064075764080770/2163eb6538a7581a55bc4b3c2199136a.png';
+
 export async function setDiscordPresence(
-  customClientId: string | undefined,
   gameName: string,
   details: string,
   state: string,
-  smallImage?: string,
+  gameIconUrl?: string,
   smallText?: string,
   launcherIcon?: string
 ): Promise<void> {
   try {
     await invoke('discord_update_presence', {
-      customClientId: customClientId ? customClientId.trim() : null,
+      customClientId: null,
       gameName,
       details,
       state,
-      // Discord uses large_image as the main icon (launcher)
-      largeImage: launcherIcon || 'app_icon',
-      largeText: 'Void0 Launcher',
-      // Small icon in corner shows current game
-      smallImage: smallImage || null,
-      smallText: smallText || gameName,
+      largeImage: gameIconUrl || null,
+      largeText: gameName,
+      smallImage: launcherIcon || DEFAULT_LAUNCHER_ICON_URL,
+      smallText: smallText || 'AIO Launcher',
     });
   } catch (err) {
     console.debug('Discord RPC error:', err);
@@ -45,7 +45,7 @@ export function getGameWebIconUrl(biz: string, localIcon?: string): string {
     return 'https://fastcdn.hoyoverse.com/content-v2/bh3/102030/14f24ef78c8bc90666993a401c385c7a_4855964893796677937.png';
   }
   if (lower.includes('endfield')) {
-    return 'https://gl-utils-public.hg-cdn.com/hg-utils/prod/eppcsuwqpaueijqk/YDUTE5gscDZ229CW/56/db/56dbf737e92191d5414241f5913792cf.webp';
+    return 'https://patchwiki.biligame.com/images/zmd/4/43/t8b9iaomf3iui6ct7w96u83htis4zj0.png';
   }
   return '';
 }

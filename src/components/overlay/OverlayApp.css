@@ -1,0 +1,707 @@
+/* ==========================================================================
+   Arknights: Endfield (A9E) Tactical Minimap HUD & Overlay CSS
+   ========================================================================== */
+
+:root {
+  --ef-yellow: #f59e0b;
+  --ef-yellow-bright: #fbbf24;
+  --ef-yellow-glow: rgba(245, 158, 11, 0.45);
+  --ef-bg-dark: #0b0d12;
+  --ef-bg-panel: rgba(14, 17, 24, 0.94);
+  --ef-border: rgba(245, 158, 11, 0.35);
+  --ef-border-subtle: rgba(255, 255, 255, 0.12);
+  --ef-text-dim: #94a3b8;
+  --ef-cyan: #38bdf8;
+}
+
+/* Base transparent overlay container */
+.overlay-root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Rajdhani', sans-serif;
+  color: #f1f5f9;
+  background: transparent !important;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   MINI MAP HUD (Authentic Arknights: Endfield UI)
+   ========================================================================== */
+.ef-minimap-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+/* Top Tactical Drag Header */
+.ef-drag-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  background: rgba(11, 13, 18, 0.96);
+  border: 1px solid var(--ef-border);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  padding: 0 8px;
+  cursor: grab;
+  position: relative;
+  z-index: 50;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+}
+
+.ef-drag-header:active {
+  cursor: grabbing;
+}
+
+.ef-header-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: var(--ef-yellow-bright);
+  white-space: nowrap;
+}
+
+.ef-grip-dots {
+  display: flex;
+  gap: 2px;
+  opacity: 0.7;
+}
+
+.ef-dot {
+  width: 3px;
+  height: 3px;
+  background: var(--ef-yellow);
+  border-radius: 50%;
+}
+
+.ef-status-pulse {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.5; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.ef-header-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.ef-tool-btn {
+  background: transparent;
+  border: none;
+  color: var(--ef-text-dim);
+  padding: 3px 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.ef-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.ef-tool-btn.active {
+  color: var(--ef-yellow);
+  background: rgba(245, 158, 11, 0.25);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.ef-tool-btn.sync {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: var(--ef-yellow-bright);
+  padding: 2px 6px;
+  font-size: 8.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.ef-tool-btn.sync:hover {
+  background: rgba(245, 158, 11, 0.3);
+  border-color: var(--ef-yellow-bright);
+  color: #fff;
+}
+
+.ef-tool-btn.close:hover {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.2);
+}
+
+/* Minimap Viewport Frame */
+.ef-minimap-viewport {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background: #090b0f;
+  border: 1.5px solid var(--ef-yellow);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+/* Squircle mode (Endfield authentic in-game HUD shape) */
+.ef-minimap-viewport.squircle {
+  border-radius: 0 0 16px 16px;
+}
+
+/* Circular radar mode */
+.ef-minimap-viewport.circle {
+  border-radius: 50%;
+  margin-top: 4px;
+  box-shadow: 0 0 0 2px #141720, 0 0 0 4px var(--ef-yellow), 0 12px 32px rgba(0, 0, 0, 0.9);
+}
+
+/* Tactical Corner Brackets (for Squircle mode) */
+.ef-corner-bracket {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 25;
+}
+
+.ef-corner-tl {
+  top: 4px;
+  left: 4px;
+  border-top: 2.5px solid var(--ef-yellow-bright);
+  border-left: 2.5px solid var(--ef-yellow-bright);
+}
+
+.ef-corner-tr {
+  top: 4px;
+  right: 4px;
+  border-top: 2.5px solid var(--ef-yellow-bright);
+  border-right: 2.5px solid var(--ef-yellow-bright);
+}
+
+.ef-corner-bl {
+  bottom: 4px;
+  left: 4px;
+  border-bottom: 2.5px solid var(--ef-yellow-bright);
+  border-left: 2.5px solid var(--ef-yellow-bright);
+}
+
+.ef-corner-br {
+  bottom: 4px;
+  right: 4px;
+  border-bottom: 2.5px solid var(--ef-yellow-bright);
+  border-right: 2.5px solid var(--ef-yellow-bright);
+}
+
+/* Tactical North Indicator */
+.ef-compass-n {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 18, 24, 0.85);
+  border: 1px solid var(--ef-yellow);
+  color: var(--ef-yellow-bright);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  z-index: 25;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Active Pan Mode Overlay Notification */
+.ef-pan-mode-indicator {
+  position: absolute;
+  top: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(245, 158, 11, 0.92);
+  color: #0b0d12;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+  z-index: 35;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Center Player Locator Chevron */
+.ef-player-chevron {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 12px solid var(--ef-yellow-bright);
+  filter: drop-shadow(0 0 6px var(--ef-yellow));
+  pointer-events: none;
+  z-index: 30;
+}
+
+/* Tactical HUD Reticles & Rings Overlay */
+.ef-hud-reticle-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ef-range-ring {
+  position: absolute;
+  width: 58%;
+  height: 58%;
+  border-radius: 50%;
+  border: 1px dashed rgba(245, 158, 11, 0.3);
+}
+
+.ef-crosshair-h {
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 15%, rgba(245, 158, 11, 0.3) 50%, transparent 85%);
+}
+
+.ef-crosshair-v {
+  position: absolute;
+  height: 100%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent 15%, rgba(245, 158, 11, 0.3) 50%, transparent 85%);
+}
+
+/* Bottom Technical Readout */
+.ef-hud-footer {
+  position: absolute;
+  bottom: 6px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 25;
+}
+
+.ef-hud-loc,
+.ef-hud-scale {
+  font-size: 8px;
+  font-weight: 800;
+  color: var(--ef-yellow-bright);
+  background: rgba(10, 13, 18, 0.78);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 1px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+
+/* Compact Vertical Zoom Control (Right edge) */
+.ef-hud-zoom-pill {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: rgba(14, 18, 25, 0.88);
+  border: 1px solid var(--ef-border);
+  border-radius: 6px;
+  padding: 3px 2px;
+  z-index: 35;
+  opacity: 0.35;
+  transition: opacity 0.2s ease;
+}
+
+.ef-minimap-viewport:hover .ef-hud-zoom-pill,
+.ef-hud-zoom-pill:hover {
+  opacity: 1;
+}
+
+.ef-zoom-btn {
+  background: transparent;
+  border: none;
+  color: #e2e8f0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ef-zoom-btn:hover {
+  background: rgba(245, 158, 11, 0.25);
+  color: var(--ef-yellow-bright);
+}
+
+.ef-zoom-val {
+  font-size: 7.5px;
+  font-weight: 700;
+  color: var(--ef-yellow);
+  user-select: none;
+}
+
+/* Minimap Desktop Iframe (Offsets hide sidebar and top navbar) */
+.ef-minimap-iframe {
+  position: absolute;
+  border: none;
+  background: #11141c;
+  width: 1440px;
+  height: 900px;
+  min-width: 1024px !important;
+  min-height: 600px !important;
+  transition: left 0.25s cubic-bezier(0.16, 1, 0.3, 1), top 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Quick Location Sync corner switcher banner */
+.ef-quick-sync-banner {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  background: rgba(14, 18, 26, 0.96);
+  border: 1px solid var(--ef-yellow);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  z-index: 100;
+}
+
+.ef-quick-sync-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 8.5px;
+  font-weight: 800;
+  color: var(--ef-yellow-bright);
+  letter-spacing: 0.4px;
+}
+
+/* Mini Compact Settings Overlay Modal */
+.ef-mini-settings-modal {
+  position: absolute;
+  inset: 32px 10px 10px 10px;
+  background: rgba(12, 15, 20, 0.98);
+  border: 1.5px solid var(--ef-yellow);
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.95);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
+.ef-mini-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 6px;
+}
+
+.ef-mini-settings-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ef-yellow-bright);
+  letter-spacing: 0.5px;
+}
+
+/* Location Sync card in Settings */
+.ef-sync-card {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 6px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ef-sync-card-title {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--ef-yellow-bright);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  letter-spacing: 0.5px;
+}
+
+.ef-sync-card-desc {
+  margin: 0;
+  font-size: 9px;
+  color: #cbd5e1;
+  line-height: 1.35;
+}
+
+.ef-sync-steps {
+  font-size: 8.5px;
+  color: #94a3b8;
+  margin: 0;
+  padding-left: 14px;
+  line-height: 1.45;
+}
+
+.ef-sync-steps li {
+  margin-bottom: 2px;
+}
+
+.ef-sync-steps b {
+  color: var(--ef-yellow-bright);
+}
+
+.ef-setting-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ef-setting-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ef-text-dim);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ef-btn-group {
+  display: flex;
+  gap: 4px;
+}
+
+.ef-btn-group-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--ef-border-subtle);
+  color: #cbd5e1;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.ef-btn-group-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.ef-btn-group-btn.active {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: var(--ef-yellow);
+  color: var(--ef-yellow-bright);
+}
+
+.ef-btn-text-link {
+  background: transparent;
+  border: none;
+  color: var(--ef-yellow);
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.ef-btn-text-link:hover {
+  color: var(--ef-yellow-bright);
+}
+
+/* ==========================================================================
+   FULL TACTICAL COMMAND MAP MODE (Alt + F)
+   ========================================================================== */
+.ef-fullmap-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: #0b0d12;
+  border: 1px solid var(--ef-border);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.ef-fullmap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 38px;
+  background: rgba(14, 18, 25, 0.98);
+  border-bottom: 1px solid var(--ef-border);
+  padding: 0 12px;
+  cursor: grab;
+  white-space: nowrap;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.ef-fullmap-header:active {
+  cursor: grabbing;
+}
+
+.ef-fullmap-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ef-fullmap-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.ef-fullmap-sub {
+  font-size: 9px;
+  color: var(--ef-yellow-bright);
+  background: rgba(245, 158, 11, 0.15);
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ef-fullmap-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ef-badge-btn {
+  background: rgba(14, 17, 24, 0.94);
+  border: 1px solid var(--ef-border);
+  color: #e2e8f0;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.ef-badge-btn:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: var(--ef-yellow);
+  color: var(--ef-yellow-bright);
+}
+
+.ef-badge-btn.amber {
+  background: var(--ef-yellow);
+  color: #0b0d12;
+  border-color: var(--ef-yellow-bright);
+}
+
+.ef-badge-btn.amber:hover {
+  background: var(--ef-yellow-bright);
+  box-shadow: 0 0 12px var(--ef-yellow-glow);
+}
+
+.ef-fullmap-iframe-box {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #0f1218;
+}
+
+.ef-fullmap-sync-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(245, 158, 11, 0.12);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 6px 14px;
+  font-size: 10.5px;
+  color: #f1f5f9;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ef-fullmap-sync-bar b {
+  color: var(--ef-yellow-bright);
+}
+
+.ef-fullmap-header-group {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.ef-fullmap-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 1024px !important;
+  min-height: 600px !important;
+  border: none;
+  background: #0f1218;
+}

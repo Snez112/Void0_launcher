@@ -38,6 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               ) : (
                 <span>{game.display?.name?.slice(0, 2)}</span>
               )}
+              {isEndfield && <span className="endfield-map-badge">MAP</span>}
             </div>
           </React.Fragment>
         );

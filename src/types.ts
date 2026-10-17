@@ -80,7 +80,34 @@ export interface AppConfig {
   gamePaths: Record<string, string>; // game_id -> executable path
   cookie: string; // HoYoLAB Cookie
   autoCheckin: boolean; // Auto check-in on app launch
-  discordClientId?: string; // Optional custom Discord App ID
+  gameLaunchArgs?: Record<string, string>; // game_id -> custom command line args
+  gameBorderless?: Record<string, boolean>; // game_id -> borderless window
+  gameForceDx12?: Record<string, boolean>; // game_id -> DX12
+}
+
+export interface HsrGraphicsSettings {
+  FPS: number; // 30, 60, 120
+  EnableVSync: boolean;
+  RenderScale: number; // 0.8 to 2.0
+  ResolutionQuality: number; // 1 to 5
+  ShadowQuality: number;
+  LightQuality: number;
+  CharacterQuality: number;
+  EnvDetailQuality: number;
+  ReflectionQuality: number;
+  SFXQuality: number;
+  BloomQuality: number;
+  AAMode: number; // 0: Off, 1: TAA, 2: FXAA
+  DlssQuality: number; // 0: Off, 1: Ultra Perf, 2: Perf, 3: Balanced, 4: Quality, 5: DLAA
+}
+
+export interface GameGraphicsConfig {
+  width: number;
+  height: number;
+  fullscreen_mode: number; // 1: Fullscreen, 3: Windowed
+  borderless: boolean;
+  custom_args: string;
+  hsr_graphics?: HsrGraphicsSettings | null;
 }
 
 export interface CheckinStatus {

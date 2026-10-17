@@ -4,8 +4,10 @@ import {
   HoyoBanner,
   HoyoPost,
   HoyoGamePackageResult,
+  HoyoPackageInfo,
   Region,
 } from '../types';
+import { invoke } from '@tauri-apps/api/core';
 import endfieldIcon from '../assets/endfield-icon.svg';
 import endfieldLogo from '../assets/endfield-logo.svg';
 
@@ -71,32 +73,53 @@ const ENDFIELD_CONFIG = {
   },
 };
 
+// Safe network fetchers using Tauri invoke to bypass webview CORS/Origin blocks
+async function safeGet<T>(url: string): Promise<T> {
+  try {
+    const raw = await invoke<string>('fetch_hoyo_api', { url });
+    return JSON.parse(raw);
+  } catch {
+    const res = await fetch(url);
+    return await res.json();
+  }
+}
+
+async function safePost<T>(url: string, body: any): Promise<T> {
+  const jsonStr = typeof body === 'string' ? body : JSON.stringify(body);
+  try {
+    const raw = await invoke<string>('fetch_http_post', { url, body: jsonStr });
+    return JSON.parse(raw);
+  } catch {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: jsonStr,
+    });
+    return await res.json();
+  }
+}
+
 export async function fetchEndfieldBackgrounds(region: Region, language: string): Promise<HoyoBackground[]> {
   const cfg = ENDFIELD_CONFIG[region] || ENDFIELD_CONFIG.os;
   const reqLang = language.toLowerCase().includes('zh') ? 'zh-cn' : language.toLowerCase().includes('vi') ? 'vi-vn' : 'en-us';
 
   try {
-    const res = await fetch(cfg.batchProxyUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        proxy_reqs: [
-          {
-            kind: 'get_main_bg_image',
-            get_main_bg_image_req: {
-              appcode: cfg.appCode,
-              channel: String(cfg.channel),
-              sub_channel: String(cfg.subChannel),
-              language: reqLang,
-              platform: 'Windows',
-              source: 'launcher',
-            },
+    const data = await safePost<any>(cfg.batchProxyUrl, {
+      proxy_reqs: [
+        {
+          kind: 'get_main_bg_image',
+          get_main_bg_image_req: {
+            appcode: cfg.appCode,
+            channel: String(cfg.channel),
+            sub_channel: String(cfg.subChannel),
+            language: reqLang,
+            platform: 'Windows',
+            source: 'launcher',
           },
-        ],
-      }),
+        },
+      ],
     });
 
-    const data = await res.json();
     const bgData = data?.proxy_rsps?.[0]?.get_main_bg_image_rsp?.main_bg_image;
     if (bgData) {
       return [
@@ -137,38 +160,33 @@ export async function fetchEndfieldContent(
   const reqLang = language.toLowerCase().includes('zh') ? 'zh-cn' : language.toLowerCase().includes('vi') ? 'vi-vn' : 'en-us';
 
   try {
-    const res = await fetch(cfg.batchProxyUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        proxy_reqs: [
-          {
-            kind: 'get_banner',
-            get_banner_req: {
-              appcode: cfg.appCode,
-              channel: String(cfg.channel),
-              sub_channel: String(cfg.subChannel),
-              language: reqLang,
-              platform: 'Windows',
-              source: 'launcher',
-            },
+    const data = await safePost<any>(cfg.batchProxyUrl, {
+      proxy_reqs: [
+        {
+          kind: 'get_banner',
+          get_banner_req: {
+            appcode: cfg.appCode,
+            channel: String(cfg.channel),
+            sub_channel: String(cfg.subChannel),
+            language: reqLang,
+            platform: 'Windows',
+            source: 'launcher',
           },
-          {
-            kind: 'get_announcement',
-            get_announcement_req: {
-              appcode: cfg.appCode,
-              channel: String(cfg.channel),
-              sub_channel: String(cfg.subChannel),
-              language: reqLang,
-              platform: 'Windows',
-              source: 'launcher',
-            },
+        },
+        {
+          kind: 'get_announcement',
+          get_announcement_req: {
+            appcode: cfg.appCode,
+            channel: String(cfg.channel),
+            sub_channel: String(cfg.subChannel),
+            language: reqLang,
+            platform: 'Windows',
+            source: 'launcher',
           },
-        ],
-      }),
+        },
+      ],
     });
 
-    const data = await res.json();
     const bannerRsp = data?.proxy_rsps?.find((p: any) => p.kind === 'get_banner')?.get_banner_rsp;
     const announceRsp = data?.proxy_rsps?.find((p: any) => p.kind === 'get_announcement')?.get_announcement_rsp;
 
@@ -202,12 +220,12 @@ export async function fetchEndfieldContent(
   }
 }
 
-export async function fetchEndfieldPackages(region: Region): Promise<HoyoGamePackageResult> {
+export async function fetchEndfieldPackages(region: Region, localVersion?: string | null): Promise<HoyoGamePackageResult> {
   const cfg = ENDFIELD_CONFIG[region] || ENDFIELD_CONFIG.os;
+  const url = localVersion ? `${cfg.latestUrl}&version=${encodeURIComponent(localVersion)}` : cfg.latestUrl;
 
   try {
-    const res = await fetch(cfg.latestUrl);
-    const data = await res.json();
+    const data = await safeGet<any>(url);
 
     const packs = data?.pkg?.packs || [];
     const gamePkgs = packs.map((p: any) => ({
@@ -223,10 +241,41 @@ export async function fetchEndfieldPackages(region: Region): Promise<HoyoGamePac
       audio_pkgs: [],
     };
 
+    const patches: HoyoPackageInfo[] = [];
+    if (data?.patch?.patches && data.patch.patches.length > 0) {
+      patches.push({
+        version: data.version || '1.6.3',
+        game_pkgs: data.patch.patches.map((p: any) => ({
+          url: p.url,
+          md5: p.md5,
+          size: String(p.package_size),
+          decompressed_size: String(p.package_size),
+        })),
+        audio_pkgs: [],
+      });
+    }
+
+    let preDownload = null;
+    if (data?.pre_patch?.patches && data.pre_patch.patches.length > 0) {
+      preDownload = {
+        major: null,
+        patches: [{
+          version: data.pre_patch.version || '',
+          game_pkgs: data.pre_patch.patches.map((p: any) => ({
+            url: p.url,
+            md5: p.md5,
+            size: String(p.package_size),
+            decompressed_size: String(p.package_size),
+          })),
+          audio_pkgs: [],
+        }],
+      };
+    }
+
     return {
       main: mainPkg,
-      patches: [],
-      pre_download: null,
+      patches,
+      pre_download: preDownload,
     };
   } catch (err) {
     console.error('Lỗi tải gói cài đặt Endfield:', err);

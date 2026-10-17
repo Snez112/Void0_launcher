@@ -18,6 +18,7 @@ import {
   importGachaRecords,
 } from '../../services/gachaApi';
 import { openFolder } from '../../services/nativeApi';
+import { CustomSelect } from '../common/CustomSelect';
 
 interface RollTrackerModalProps {
   currentGame?: HoyoGame;
@@ -123,22 +124,21 @@ export const RollTrackerModal: React.FC<RollTrackerModalProps> = ({
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {overview?.uids && overview.uids.length > 0 && (
-              <select
-                className="custom-dropdown-trigger"
-                style={{ height: 28, padding: '2px 8px', maxWidth: '240px' }}
-                value={selectedUid || ''}
-                onChange={(e) => {
-                  const uid = Number(e.target.value);
-                  setSelectedUid(uid);
-                  loadData(uid);
-                }}
-              >
-                {overview.uids.map((u) => (
-                  <option key={u.uid} value={u.uid} style={{ background: '#1c212b', color: '#fff' }}>
-                    {u.nickname ? `${u.nickname} (${u.uid})` : `UID: ${u.uid}`}
-                  </option>
-                ))}
-              </select>
+              <div style={{ minWidth: 180, maxWidth: 240 }}>
+                <CustomSelect
+                  value={selectedUid || overview.uids[0].uid}
+                  options={overview.uids.map((u) => ({
+                    value: u.uid,
+                    label: u.nickname ? `${u.nickname} (${u.uid})` : `UID: ${u.uid}`,
+                  }))}
+                  onChange={(val) => {
+                    const uid = Number(val);
+                    setSelectedUid(uid);
+                    loadData(uid);
+                  }}
+                  style={{ height: 28, fontSize: 12 }}
+                />
+              </div>
             )}
             <button className="win-btn" onClick={onClose}>
               <X size={16} />

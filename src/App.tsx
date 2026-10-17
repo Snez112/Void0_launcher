@@ -13,7 +13,10 @@ import {
 import {
   launchGame,
   openFolder,
-  pickGameFile,
+  pickGameFolder,
+  getLocalGameVersion,
+  isGameRunning,
+  openOfficialLauncher,
 } from './services/nativeApi';
 import {
   HoyoGame,
@@ -32,7 +35,10 @@ import { CheckinModal } from './components/modals/CheckinModal';
 import { SettingsModal } from './components/modals/SettingsModal';
 import { PackageModal } from './components/modals/PackageModal';
 import { RollTrackerModal } from './components/modals/RollTrackerModal';
-import { Gift, Sparkles, MessageSquare, Globe } from 'lucide-react';
+import { GameSettingsModal } from './components/modals/GameSettingsModal';
+import { EndfieldBuildTab } from './components/endfield/EndfieldBuildTab';
+import { launchGameAdvanced } from './services/gameSettingsApi';
+import { Gift, Sparkles, MessageSquare, Globe, Crosshair } from 'lucide-react';
 import {
   ENDFIELD_GAME_ID,
   getEndfieldGameDef,
@@ -53,6 +59,20 @@ const DEFAULT_CONFIG: AppConfig = {
   autoCheckin: true,
 };
 
+function isOlderVersion(localVer: string, remoteVer: string): boolean {
+  const lParts = localVer.split('.').map((p) => parseInt(p, 10) || 0);
+  const rParts = remoteVer.split('.').map((p) => parseInt(p, 10) || 0);
+  const maxLen = Math.max(lParts.length, rParts.length);
+
+  for (let i = 0; i < maxLen; i++) {
+    const l = lParts[i] || 0;
+    const r = rParts[i] || 0;
+    if (l < r) return true;
+    if (l > r) return false;
+  }
+  return false;
+}
+
 export default function App() {
   const [config, setConfig] = useState<AppConfig>(() => {
     try {
@@ -69,10 +89,14 @@ export default function App() {
   const [banners, setBanners] = useState<HoyoBanner[]>([]);
   const [posts, setPosts] = useState<HoyoPost[]>([]);
   const [packageData, setPackageData] = useState<HoyoGamePackageResult | null>(null);
+  const [localGameVersion, setLocalGameVersion] = useState<string | null>(null);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
   const [activeBannerIdx, setActiveBannerIdx] = useState<number>(0);
+  const [endfieldSubView, setEndfieldSubView] = useState<'overview' | 'build'>('build');
 
   // Modals
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [showGameSettings, setShowGameSettings] = useState<boolean>(false);
   const [showPkgModal, setShowPkgModal] = useState<boolean>(false);
   const [showCheckinModal, setShowCheckinModal] = useState<boolean>(false);
   const [showRollModal, setShowRollModal] = useState<boolean>(false);
@@ -99,6 +123,11 @@ export default function App() {
         const gameList = await fetchGames(config.region, config.language);
         if (!isMounted) return;
 
+        // Exclude unwanted spin-offs: Petit Planet (hyg) & Honkai Nexus Anima (abc)
+        const filteredGameList = gameList.filter(
+          (g) => !['hyg', 'abc'].some((prefix) => g.biz.toLowerCase().startsWith(prefix))
+        );
+
         // Prioritize major games at the top
         const PRIORITY_ORDER = ['nap', 'hkrpg', 'hk4e', 'endfield', 'bh3'];
         const getPriority = (biz: string) => {
@@ -107,12 +136,12 @@ export default function App() {
         };
 
         const endfieldDef = getEndfieldGameDef(config.language);
-        const allGames = [...gameList, endfieldDef].sort(
+        const allGames = [...filteredGameList, endfieldDef].sort(
           (a, b) => getPriority(a.biz) - getPriority(b.biz)
         );
 
         setGames(allGames);
-        if (allGames.length > 0 && !selectedGameId) {
+        if (allGames.length > 0 && (!selectedGameId || !allGames.some((g) => g.id === selectedGameId))) {
           const zzz = allGames.find(
             (g) => g.biz.includes('nap') || g.display?.name?.toLowerCase().includes('zenless')
           );
@@ -142,7 +171,7 @@ export default function App() {
         if (selectedGameId === ENDFIELD_GAME_ID) {
           bgPromise = fetchEndfieldBackgrounds(config.region, config.language);
           contentPromise = fetchEndfieldContent(config.region, config.language);
-          pkgPromise = fetchEndfieldPackages(config.region);
+          pkgPromise = fetchEndfieldPackages(config.region, localGameVersion);
         } else {
           bgPromise = fetchGameBackgrounds(config.region, config.language, selectedGameId);
           contentPromise = fetchGameContent(config.region, config.language, selectedGameId);
@@ -173,26 +202,37 @@ export default function App() {
     return () => {
       isMounted = false;
     };
-  }, [selectedGameId, config.region, config.language]);
+  }, [selectedGameId, config.region, config.language, localGameVersion]);
 
   const currentGame = games.find((g) => g.id === selectedGameId);
   const t = getT(config.language);
 
-  // Update Discord RPC on game switch
+  // Update Discord RPC reactively based on state (browsing, build guide, in game)
   useEffect(() => {
     if (!currentGame) return;
-    const gameKey = currentGame.biz || currentGame.display?.name || '';
-    const gameName = currentGame.display?.name || 'Void0 Launcher';
+    const gameKey = currentGame.biz || currentGame.display?.name || currentGame.id || '';
+    const gameName = currentGame.display?.name || 'AIO Launcher';
     const gameIconUrl = getGameWebIconUrl(gameKey, currentGame.display?.icon?.url);
+
+    let details = `Browsing ${gameName}`;
+    let state = 'In Launcher';
+
+    if (isRunning) {
+      details = `Playing ${gameName}`;
+      state = 'In Game';
+    } else if (currentGame.id === ENDFIELD_GAME_ID && endfieldSubView === 'build') {
+      details = 'Talos-II Archive (v1.6)';
+      state = 'Viewing Operator Build Guide';
+    }
+
     setDiscordPresence(
-      config.discordClientId,
       gameKey,
-      `Browsing ${gameName}`,
-      'In Launcher',
+      details,
+      state,
       gameIconUrl,
       gameName
     );
-  }, [selectedGameId, currentGame, config.discordClientId]);
+  }, [selectedGameId, currentGame, isRunning, endfieldSubView]);
 
   // Check-in info
   const loadCheckin = async (biz: string) => {
@@ -259,11 +299,83 @@ export default function App() {
   const currentBg = backgrounds[0];
   const currentPath = config.gamePaths[selectedGameId] || '';
 
+  // Poll running status
+  useEffect(() => {
+    let active = true;
+    if (!currentPath || !currentGame) {
+      setIsRunning(false);
+      return;
+    }
+
+    const check = () => {
+      isGameRunning(currentPath, currentGame.biz || currentGame.id || '')
+        .then((running) => {
+          if (active) setIsRunning(running);
+        })
+        .catch(() => {
+          if (active) setIsRunning(false);
+        });
+    };
+
+    check();
+    const interval = setInterval(check, 2500);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [currentPath, currentGame]);
+
+  // Detect local installed game version
+  useEffect(() => {
+    let active = true;
+    if (!currentPath || !currentGame) {
+      setLocalGameVersion(null);
+      return;
+    }
+
+    const refreshVersion = () => {
+      getLocalGameVersion(currentPath, currentGame.biz || currentGame.id || '')
+        .then((ver) => {
+          if (active) setLocalGameVersion(ver);
+        })
+        .catch((err) => {
+          console.warn('Không đọc được phiên bản game nội bộ:', err);
+          if (active) setLocalGameVersion(null);
+        });
+    };
+
+    refreshVersion();
+
+    const onFocus = () => refreshVersion();
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      active = false;
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [currentPath, currentGame]);
+
+  const hasUpdateAction = Boolean(
+    currentPath &&
+    localGameVersion &&
+    packageData?.main?.version &&
+    isOlderVersion(localGameVersion, packageData.main.version)
+  );
+
+  const handleUpdateGame = async () => {
+    if (currentPath && currentGame) {
+      const biz = currentGame.biz || currentGame.id || '';
+      const opened = await openOfficialLauncher(currentPath, biz);
+      if (opened) return;
+    }
+    setShowPkgModal(true);
+  };
+
   // Launch Game
   const handleLaunchGame = async () => {
     if (!currentPath) {
       try {
-        const path = await pickGameFile();
+        const path = await pickGameFolder();
         if (path && selectedGameId) {
           setConfig((prev) => ({
             ...prev,
@@ -276,21 +388,35 @@ export default function App() {
       return;
     }
     try {
-      await launchGame(currentPath);
-      if (currentGame) {
-        const gameKey = currentGame.biz || currentGame.display?.name || '';
-        const gameName = currentGame.display?.name || 'Game';
-        const gameIconUrl = getGameWebIconUrl(gameKey, currentGame.display?.icon?.url);
-        setDiscordPresence(
-          config.discordClientId,
-          gameKey,
-          `Playing ${gameName}`,
-          'In Game',
-          gameIconUrl,
-          gameName
+      const customArgs = config.gameLaunchArgs?.[selectedGameId] || '';
+      const borderless = config.gameBorderless?.[selectedGameId] || false;
+      const forceDx12 = config.gameForceDx12?.[selectedGameId] || false;
+
+      // Launch with custom arguments / borderless if configured
+      if (customArgs || borderless || forceDx12) {
+        await launchGameAdvanced(
+          currentPath,
+          {
+            width: 0,
+            height: 0,
+            fullscreen_mode: borderless ? 3 : 1,
+            borderless,
+            custom_args: customArgs,
+          },
+          forceDx12,
+          currentGame?.biz || currentGame?.id
         );
+      } else {
+        await launchGame(currentPath, currentGame?.biz || currentGame?.id);
       }
+      setIsRunning(true);
     } catch (err) {
+      console.warn('Lỗi khởi chạy trực tiếp, thử mở qua launcher gốc:', err);
+      if (currentPath && currentGame) {
+        const biz = currentGame.biz || currentGame.id || '';
+        const opened = await openOfficialLauncher(currentPath, biz);
+        if (opened) return;
+      }
       alert(`Lỗi khởi động game: ${err}`);
     }
   };
@@ -350,7 +476,11 @@ export default function App() {
 
         {/* Main Content Area */}
         <main className="content-area">
-          <div className="bg-layer">
+          {currentGame?.id === ENDFIELD_GAME_ID && endfieldSubView === 'build' ? (
+            <EndfieldBuildTab onBackToOverview={() => setEndfieldSubView('overview')} />
+          ) : (
+            <>
+              <div className="bg-layer">
             {currentBg?.video?.url ? (
               <video
                 ref={videoRef}
@@ -387,7 +517,7 @@ export default function App() {
                     alt={currentGame?.display?.name}
                   />
                 ) : (
-                  <h1 className="game-name">{currentGame?.display?.name || 'Void0 Launcher'}</h1>
+                  <h1 className="game-name">{currentGame?.display?.name || 'AIO Launcher'}</h1>
                 )}
                 {currentGame?.display?.introduction && (
                   <p className="game-desc">{currentGame.display.introduction}</p>
@@ -397,6 +527,16 @@ export default function App() {
               <div className="quick-tools">
                 {currentGame?.id === ENDFIELD_GAME_ID ? (
                   <>
+                    <button
+                      type="button"
+                      className="tool-btn a9e-build-toggle-btn"
+                      onClick={() => setEndfieldSubView('build')}
+                      title="Mở Tab Hướng Dẫn Build Operator & Trang Bị AIC Toàn Diện (v1.6)"
+                    >
+                      <Crosshair size={15} color="#ffd600" />
+                      <span>Hướng Dẫn Build (v1.6)</span>
+                      <span className="a9e-build-badge-pill">META</span>
+                    </button>
                     <a
                       href="https://endfield.gryphline.com"
                       target="_blank"
@@ -466,13 +606,18 @@ export default function App() {
               packageData={packageData}
               currentPath={currentPath}
               language={config.language}
+              localVersion={localGameVersion}
+              isRunning={isRunning}
               onOpenSettings={() => setShowSettings(true)}
+              onOpenGameSettings={() => setShowGameSettings(true)}
               onOpenPackageModal={() => setShowPkgModal(true)}
               onOpenFolder={handleOpenFolder}
-              onLaunchGame={handleLaunchGame}
+              onLaunchGame={hasUpdateAction ? handleUpdateGame : handleLaunchGame}
             />
           </div>
-        </main>
+        </>
+      )}
+    </main>
       </div>
 
       {/* Modals */}
@@ -503,19 +648,17 @@ export default function App() {
           currentPath={currentPath}
           region={config.region}
           language={config.language}
-          discordClientId={config.discordClientId}
           onClose={() => setShowSettings(false)}
-          onSave={(path, region, language, discordClientId) => {
+          onSave={(path, region, language) => {
             if (selectedGameId) {
               setConfig({
                 ...config,
                 region,
                 language,
-                discordClientId,
                 gamePaths: { ...config.gamePaths, [selectedGameId]: path },
               });
             } else {
-              setConfig({ ...config, region, language, discordClientId });
+              setConfig({ ...config, region, language });
             }
             setShowSettings(false);
           }}
@@ -526,6 +669,8 @@ export default function App() {
         <PackageModal
           packageData={packageData}
           language={config.language}
+          currentPath={currentPath}
+          gameBiz={currentGame?.biz || currentGame?.id || ''}
           onClose={() => setShowPkgModal(false)}
         />
       )}
@@ -536,6 +681,34 @@ export default function App() {
           gameExePath={currentPath}
           language={config.language}
           onClose={() => setShowRollModal(false)}
+        />
+      )}
+
+      {showGameSettings && currentGame && (
+        <GameSettingsModal
+          game={currentGame}
+          language={config.language}
+          customArgs={config.gameLaunchArgs?.[selectedGameId] || ''}
+          borderless={config.gameBorderless?.[selectedGameId] || false}
+          forceDx12={config.gameForceDx12?.[selectedGameId] || false}
+          onClose={() => setShowGameSettings(false)}
+          onSaveLauncherConfig={(customArgs, borderless, forceDx12) => {
+            setConfig((prev) => ({
+              ...prev,
+              gameLaunchArgs: {
+                ...(prev.gameLaunchArgs || {}),
+                [selectedGameId]: customArgs,
+              },
+              gameBorderless: {
+                ...(prev.gameBorderless || {}),
+                [selectedGameId]: borderless,
+              },
+              gameForceDx12: {
+                ...(prev.gameForceDx12 || {}),
+                [selectedGameId]: forceDx12,
+              },
+            }));
+          }}
         />
       )}
     </div>

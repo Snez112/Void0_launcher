@@ -7,7 +7,11 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 static NONCE_COUNTER: AtomicU64 = AtomicU64::new(1);
 
-pub fn resolve_client_id(custom_id: Option<&str>, game_name_or_biz: &str) -> String {
+pub const DEFAULT_CLIENT_ID: &str = "1560064075764080770";
+pub const DEFAULT_LAUNCHER_ICON: &str =
+    "https://cdn.discordapp.com/app-icons/1560064075764080770/2163eb6538a7581a55bc4b3c2199136a.png";
+
+pub fn resolve_client_id(custom_id: Option<&str>, _game_name_or_biz: &str) -> String {
     if let Some(id) = custom_id {
         let trimmed = id.trim();
         if !trimmed.is_empty() {
@@ -15,20 +19,22 @@ pub fn resolve_client_id(custom_id: Option<&str>, game_name_or_biz: &str) -> Str
         }
     }
 
-    let lower = game_name_or_biz.to_lowercase();
-    if lower.contains("nap") || lower.contains("zzz") || lower.contains("zenless") {
-        "1124154024879456276".to_string()
-    } else if lower.contains("hkrpg") || lower.contains("star rail") || lower.contains("starrail") {
-        "1124153902959431780".to_string()
-    } else if lower.contains("hk4e") || lower.contains("genshin") || lower.contains("yuanshen") {
-        "1124137436650426509".to_string()
-    } else if lower.contains("bh3") || lower.contains("honkai impact") || lower.contains("honkai3") {
-        "1124126288370737314".to_string()
-    } else if lower.contains("endfield") || lower.contains("beyond") || lower.contains("arknights") {
-        "955483486674907138".to_string()
-    } else {
-        "1138126643592970251".to_string()
+    DEFAULT_CLIENT_ID.to_string()
+}
+
+pub fn resolve_assets(
+    is_custom: bool,
+    client_id: &str,
+    passed_large: Option<String>,
+    passed_small: Option<String>,
+) -> (Option<String>, Option<String>) {
+    if is_custom && client_id != DEFAULT_CLIENT_ID {
+        return (passed_large, passed_small);
     }
+
+    let large = passed_large;
+    let small = passed_small.or_else(|| Some(DEFAULT_LAUNCHER_ICON.to_string()));
+    (large, small)
 }
 
 pub struct DiscordRpc {
@@ -100,7 +106,7 @@ impl DiscordRpc {
             let trimmed = img.trim();
             if !trimmed.is_empty() {
                 assets["large_image"] = json!(trimmed);
-                assets["large_text"] = json!(large_text.unwrap_or("Void0 Launcher"));
+                assets["large_text"] = json!(large_text.unwrap_or("AIO Launcher"));
                 has_assets = true;
             }
         }
@@ -169,7 +175,14 @@ pub fn update_presence(
     small_image: Option<String>,
     small_text: Option<String>,
 ) -> Result<(), String> {
+    let is_custom = custom_client_id
+        .as_deref()
+        .map(|s| !s.trim().is_empty())
+        .unwrap_or(false);
     let target_client_id = resolve_client_id(custom_client_id.as_deref(), game_name);
+    let (final_large_img, final_small_img) =
+        resolve_assets(is_custom, &target_client_id, large_image, small_image);
+
     let mut lock = STATE.lock().map_err(|e| e.to_string())?;
 
     if lock.is_none() {
@@ -191,23 +204,26 @@ pub fn update_presence(
     }
 
     if let Some(client) = state_ref.rpc.as_mut() {
-        if client.set_activity(
-            details,
-            state,
-            large_image.as_deref(),
-            large_text.as_deref(),
-            small_image.as_deref(),
-            small_text.as_deref(),
-            state_ref.start_time,
-        ).is_err() {
+        if client
+            .set_activity(
+                details,
+                state,
+                final_large_img.as_deref(),
+                large_text.as_deref(),
+                final_small_img.as_deref(),
+                small_text.as_deref(),
+                state_ref.start_time,
+            )
+            .is_err()
+        {
             state_ref.rpc = DiscordRpc::connect(&target_client_id);
             if let Some(c) = state_ref.rpc.as_mut() {
                 let _ = c.set_activity(
                     details,
                     state,
-                    large_image.as_deref(),
+                    final_large_img.as_deref(),
                     large_text.as_deref(),
-                    small_image.as_deref(),
+                    final_small_img.as_deref(),
                     small_text.as_deref(),
                     state_ref.start_time,
                 );

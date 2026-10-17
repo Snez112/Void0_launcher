@@ -26,6 +26,8 @@ export interface Translations {
   packagesPartsBtn: string;
   openFolderBtn: string;
   launchGameBtn: string;
+  gameRunningBtn: string;
+  updateGameBtn: string;
   launchNeedPathTip: string;
 
   // Dashboard
@@ -37,6 +39,7 @@ export interface Translations {
 
   // Quick Tools & External links
   homeWeb: string;
+  interactiveMap: string;
   community: string;
   dailyCheckinTip: string;
   dailyCheckinBtn: string;
@@ -58,11 +61,10 @@ export interface Translations {
   exePathLabel: string;
   browseBtn: string;
   browseFileBtn: string;
+  browseFolderBtn: string;
   serverRegionGroup: string;
   contentLangGroup: string;
   contentLangLabel: string;
-  discordClientIdLabel: string;
-  discordClientIdTip: string;
   cancelBtn: string;
   saveBtn: string;
 
@@ -95,6 +97,37 @@ export interface Translations {
   checkinInProgress: string;
 
   // Package Modal
+  gameSettingsTitle: string;
+  tabDisplay: string;
+  tabGraphics: string;
+  resolutionLabel: string;
+  customResolution: string;
+  displayModeLabel: string;
+  modeFullscreen: string;
+  modeWindowed: string;
+  borderlessLabel: string;
+  borderlessTip: string;
+  dx12Label: string;
+  dx12Tip: string;
+  launchArgsLabel: string;
+  launchArgsTip: string;
+  fpsLabel: string;
+  fps120Tip: string;
+  renderScaleLabel: string;
+  vsyncLabel: string;
+  shadowQualityLabel: string;
+  lightQualityLabel: string;
+  characterQualityLabel: string;
+  envDetailLabel: string;
+  reflectionLabel: string;
+  sfxQualityLabel: string;
+  bloomQualityLabel: string;
+  aaModeLabel: string;
+  dlssLabel: string;
+  saveAndApplyRegistry: string;
+  registrySuccessTip: string;
+  notSupportedGraphics: string;
+
   pkgModalTitle: string;
   pkgModalPreTitle: string;
   preDownloadTab: string;
@@ -177,7 +210,7 @@ export const translations: Record<SupportedLang, Translations> = {
     minimizeTooltip: 'Thu nhỏ',
     maximizeTooltip: 'Phóng to',
     closeTooltip: 'Đóng',
-    settingsBtn: 'Cài đặt launcher',
+    settingsBtn: 'Cài đặt game',
     minimizeBtn: 'Thu nhỏ',
     maximizeBtn: 'Phóng to',
     closeBtn: 'Đóng',
@@ -191,6 +224,8 @@ export const translations: Record<SupportedLang, Translations> = {
     packagesPartsBtn: 'Gói Tải ({count} phần)',
     openFolderBtn: 'Mở Thư Mục',
     launchGameBtn: 'BẮT ĐẦU',
+    gameRunningBtn: 'Game đang chạy',
+    updateGameBtn: 'CẬP NHẬT',
     launchNeedPathTip: 'Vui lòng nhấn để chọn tệp .exe trước khi khởi chạy game!',
 
     newsAll: 'Tất cả',
@@ -200,6 +235,7 @@ export const translations: Record<SupportedLang, Translations> = {
     noNews: 'Không có thông tin mới trong mục này.',
 
     homeWeb: 'Trang Chủ',
+    interactiveMap: 'Bản Đồ Tương Tác',
     community: 'SKPORT',
     dailyCheckinTip: 'Điểm danh nhận quà trực tiếp trên Launcher',
     dailyCheckinBtn: 'Điểm Danh',
@@ -215,16 +251,15 @@ export const translations: Record<SupportedLang, Translations> = {
     officialSiteBtn: 'Trang Chủ',
     skportBtn: 'SKPORT',
 
-    settingsTitle: 'Cài Đặt Void0 Launcher',
+    settingsTitle: 'Cài Đặt AIO Launcher',
     gamePathLabel: 'Đường dẫn tệp thực thi của {name} (.exe):',
     exePathLabel: 'Đường dẫn tệp thực thi của {game} (.exe)',
-    browseBtn: 'Duyệt File',
+    browseBtn: 'Duyệt Thư Mục',
     browseFileBtn: 'Duyệt File',
+    browseFolderBtn: 'Chọn Thư Mục',
     serverRegionGroup: 'Khu vực máy chủ (Server Region):',
     contentLangGroup: 'Ngôn ngữ hiển thị nội dung:',
     contentLangLabel: 'Ngôn ngữ hiển thị nội dung',
-    discordClientIdLabel: 'Discord Application ID (Client ID)',
-    discordClientIdTip: 'Để trống để tự nhận diện theo từng game, hoặc dán Application ID bot từ discord.com/developers để hiện tên launcher tùy chỉnh.',
     cancelBtn: 'Hủy',
     saveBtn: 'Lưu',
 
@@ -255,11 +290,43 @@ export const translations: Record<SupportedLang, Translations> = {
     checkinDoneToday: 'Đã nhận thưởng',
     checkinInProgress: 'Đang xử lý...',
 
+    // Game Graphics Settings Modal
+    gameSettingsTitle: 'Cài Đặt Game & Đồ Họa ({game})',
+    tabDisplay: 'Màn Hình & Khởi Chạy',
+    tabGraphics: 'Đồ Họa Trong Game',
+    resolutionLabel: 'Độ Phân Giải Màn Hình',
+    customResolution: 'Tùy chỉnh (W x H)',
+    displayModeLabel: 'Chế Độ Hiển Thị',
+    modeFullscreen: 'Toàn Màn Hình (Exclusive Fullscreen)',
+    modeWindowed: 'Cửa Sổ (Windowed)',
+    borderlessLabel: 'Cửa Sổ Không Viền (Borderless Window)',
+    borderlessTip: 'Khởi chạy game ở dạng Borderless không viền (-popupwindow). Dễ dàng Alt+Tab.',
+    dx12Label: 'Khởi Chạy Với DirectX 12',
+    dx12Tip: 'Thêm tham số -force-d3d12 khi khởi động. Giúp tối ưu khung hình và bật Ray Tracing / Frame Gen nếu GPU hỗ trợ.',
+    launchArgsLabel: 'Tham Số Dòng Lệnh Khởi Chạy Tùy Chỉnh',
+    launchArgsTip: 'Ví dụ: -popupwindow -screen-width 1920 -screen-height 1080',
+    fpsLabel: 'Giới Hạn Tốc Độ Khung Hình (FPS)',
+    fps120Tip: '★ 120 FPS là tính năng mở khóa trực tiếp vào registry game (mặc định trong game chỉ tới 60 FPS).',
+    renderScaleLabel: 'Tỷ Lệ Hiển Thị (Render Scale)',
+    vsyncLabel: 'Đồng Bộ Dọc (V-Sync)',
+    shadowQualityLabel: 'Chất Lượng Bóng Đổ (Shadow)',
+    lightQualityLabel: 'Chất Lượng Ánh Sáng (Lighting)',
+    characterQualityLabel: 'Chi Tiết Nhân Vật (Character)',
+    envDetailLabel: 'Chi Tiết Môi Trường (Environment)',
+    reflectionLabel: 'Phản Chiếu (Reflection)',
+    sfxQualityLabel: 'Hiệu Ứng Kỹ Năng (SFX)',
+    bloomQualityLabel: 'Hiệu Ứng Phát Sáng (Bloom)',
+    aaModeLabel: 'Khử Răng Cưa (Anti-Aliasing)',
+    dlssLabel: 'Chất Lượng NVIDIA DLSS',
+    saveAndApplyRegistry: 'Lưu & Áp Dụng Thiết Lập',
+    registrySuccessTip: 'Đã lưu thiết lập vào Registry và cấu hình launcher thành công!',
+    notSupportedGraphics: 'Cài đặt đồ họa registry hiện được hỗ trợ tốt nhất cho Honkai: Star Rail và game Unity.',
+
     pkgModalTitle: 'Gói Cài Đặt Game Chính Thức',
     pkgModalPreTitle: 'Tải Trước Bản Cập Nhật & Gói Cài Đặt',
     preDownloadTab: 'Tải Trước (Pre-download v{version})',
     fullGameTab: 'Bản Đầy Đủ Hiện Tại (v{version})',
-    olderPatchesTab: 'Bản Vá Cũ Hơn ({count})',
+    olderPatchesTab: 'Bản Vá Cập Nhật ({count})',
     preDownloadNotice: '✦ Nhà phát hành đã mở tính năng Tải Trước! Bạn có thể tải trước toàn bộ tài nguyên bản vá để khi server bảo trì xong là vào chơi ngay.',
     directCdnNotice: 'Đường dẫn tải trực tiếp từ CDN chính chủ của nhà phát hành (Phiên bản {version}):',
     patchesNotice: 'Các gói vá (Patch / HDiff) nâng cấp từ các phiên bản cũ lên phiên bản mới:',
@@ -335,7 +402,7 @@ export const translations: Record<SupportedLang, Translations> = {
     minimizeTooltip: 'Minimize',
     maximizeTooltip: 'Maximize',
     closeTooltip: 'Close',
-    settingsBtn: 'Launcher Settings',
+    settingsBtn: 'Game Settings',
     minimizeBtn: 'Minimize',
     maximizeBtn: 'Maximize',
     closeBtn: 'Close',
@@ -349,6 +416,8 @@ export const translations: Record<SupportedLang, Translations> = {
     packagesPartsBtn: 'Packages ({count} parts)',
     openFolderBtn: 'Open Folder',
     launchGameBtn: 'START GAME',
+    gameRunningBtn: 'Game is running',
+    updateGameBtn: 'UPDATE',
     launchNeedPathTip: 'Please click to select your game .exe first!',
 
     newsAll: 'All',
@@ -358,6 +427,7 @@ export const translations: Record<SupportedLang, Translations> = {
     noNews: 'No announcements available in this category.',
 
     homeWeb: 'Official Site',
+    interactiveMap: 'Interactive Map',
     community: 'SKPORT',
     dailyCheckinTip: 'Claim daily rewards directly in Launcher',
     dailyCheckinBtn: 'Daily Check-in',
@@ -373,16 +443,15 @@ export const translations: Record<SupportedLang, Translations> = {
     officialSiteBtn: 'Official Site',
     skportBtn: 'SKPORT',
 
-    settingsTitle: 'Void0 Launcher Settings',
+    settingsTitle: 'AIO Launcher Settings',
     gamePathLabel: 'Executable path for {name} (.exe):',
     exePathLabel: 'Executable path for {game} (.exe)',
-    browseBtn: 'Browse',
+    browseBtn: 'Browse Folder',
     browseFileBtn: 'Browse File',
+    browseFolderBtn: 'Select Folder',
     serverRegionGroup: 'Server Region:',
     contentLangGroup: 'Content Language:',
     contentLangLabel: 'Content Display Language',
-    discordClientIdLabel: 'Discord Application ID (Client ID)',
-    discordClientIdTip: 'Leave empty for automatic per-game IDs, or paste your bot Application ID from discord.com/developers to display a custom launcher name.',
     cancelBtn: 'Cancel',
     saveBtn: 'Save',
 
@@ -413,11 +482,43 @@ export const translations: Record<SupportedLang, Translations> = {
     checkinDoneToday: 'Reward claimed',
     checkinInProgress: 'Processing...',
 
+    // Game Graphics Settings Modal
+    gameSettingsTitle: 'Game & Graphics Settings ({game})',
+    tabDisplay: 'Display & Launch',
+    tabGraphics: 'In-Game Graphics',
+    resolutionLabel: 'Display Resolution',
+    customResolution: 'Custom (W x H)',
+    displayModeLabel: 'Display Mode',
+    modeFullscreen: 'Exclusive Fullscreen',
+    modeWindowed: 'Windowed',
+    borderlessLabel: 'Borderless Window',
+    borderlessTip: 'Launch in borderless window mode (-popupwindow) for seamless Alt+Tab.',
+    dx12Label: 'Launch with DirectX 12',
+    dx12Tip: 'Adds -force-d3d12 to launch options. Unlocks Ray Tracing and Frame Gen if supported.',
+    launchArgsLabel: 'Custom Launch Arguments',
+    launchArgsTip: 'e.g., -popupwindow -screen-width 1920 -screen-height 1080',
+    fpsLabel: 'Frame Rate Limit (FPS)',
+    fps120Tip: '★ 120 FPS directly writes to the game registry (in-game cap is 60 FPS).',
+    renderScaleLabel: 'Render Scale',
+    vsyncLabel: 'V-Sync',
+    shadowQualityLabel: 'Shadow Quality',
+    lightQualityLabel: 'Lighting Quality',
+    characterQualityLabel: 'Character Quality',
+    envDetailLabel: 'Environment Detail',
+    reflectionLabel: 'Reflection Quality',
+    sfxQualityLabel: 'SFX Quality',
+    bloomQualityLabel: 'Bloom Quality',
+    aaModeLabel: 'Anti-Aliasing Mode',
+    dlssLabel: 'NVIDIA DLSS Quality',
+    saveAndApplyRegistry: 'Save & Apply to Registry',
+    registrySuccessTip: 'Successfully applied settings to Windows Registry and launcher config!',
+    notSupportedGraphics: 'Deep registry graphics tweak is currently optimized for Honkai: Star Rail and Unity titles.',
+
     pkgModalTitle: 'Official Game Packages',
     pkgModalPreTitle: 'Pre-download & Game Packages',
     preDownloadTab: 'Pre-download (v{version})',
     fullGameTab: 'Full Client (v{version})',
-    olderPatchesTab: 'Older Patches ({count})',
+    olderPatchesTab: 'Update Patches ({count})',
     preDownloadNotice: '✦ Official Pre-download is now open! Download patch assets in advance to play immediately after maintenance.',
     directCdnNotice: 'Direct download links from official CDN servers (Version {version}):',
     patchesNotice: 'Incremental update packages (Patch / HDiff) from earlier versions:',
@@ -493,7 +594,7 @@ export const translations: Record<SupportedLang, Translations> = {
     minimizeTooltip: '最小化',
     maximizeTooltip: '最大化',
     closeTooltip: '关闭',
-    settingsBtn: '启动器设置',
+    settingsBtn: '游戏设置',
     minimizeBtn: '最小化',
     maximizeBtn: '最大化',
     closeBtn: '关闭',
@@ -507,6 +608,8 @@ export const translations: Record<SupportedLang, Translations> = {
     packagesPartsBtn: '安装包（共 {count} 个分包）',
     openFolderBtn: '打开目录',
     launchGameBtn: '开始游戏',
+    gameRunningBtn: '游戏运行中',
+    updateGameBtn: '更新游戏',
     launchNeedPathTip: '请先点击选择游戏的 .exe 可执行文件！',
 
     newsAll: '全部',
@@ -516,6 +619,7 @@ export const translations: Record<SupportedLang, Translations> = {
     noNews: '暂无资讯内容。',
 
     homeWeb: '游戏官网',
+    interactiveMap: '互动地图',
     community: '森空岛',
     dailyCheckinTip: '在启动器内直接完成每日签到领奖',
     dailyCheckinBtn: '每日签到',
@@ -531,16 +635,15 @@ export const translations: Record<SupportedLang, Translations> = {
     officialSiteBtn: '游戏官网',
     skportBtn: '森空岛 / SKPORT',
 
-    settingsTitle: 'Void0 启动器设置',
+    settingsTitle: 'AIO 启动器设置',
     gamePathLabel: '{name} 的可执行文件路径 (.exe):',
     exePathLabel: '{game} 的可执行文件路径 (.exe)',
-    browseBtn: '浏览文件',
+    browseBtn: '浏览目录',
     browseFileBtn: '浏览文件',
+    browseFolderBtn: '选择目录',
     serverRegionGroup: '服务器区域:',
     contentLangGroup: '内容显示语言:',
     contentLangLabel: '内容显示语言',
-    discordClientIdLabel: 'Discord Application ID (Client ID)',
-    discordClientIdTip: '留空则按游戏自动识别，亦可粘贴来自 discord.com/developers 的机器人应用 ID 以自定义启动器名称。',
     cancelBtn: '取消',
     saveBtn: '保存',
 
@@ -571,11 +674,43 @@ export const translations: Record<SupportedLang, Translations> = {
     checkinDoneToday: '已领取奖励',
     checkinInProgress: '处理中...',
 
+    // Game Graphics Settings Modal
+    gameSettingsTitle: '游戏与图形设置 ({game})',
+    tabDisplay: '显示与启动',
+    tabGraphics: '游戏内画质',
+    resolutionLabel: '显示分辨率',
+    customResolution: '自定义 (宽 x 高)',
+    displayModeLabel: '显示模式',
+    modeFullscreen: '独占全屏 (Fullscreen)',
+    modeWindowed: '窗口化 (Windowed)',
+    borderlessLabel: '无边框窗口 (Borderless)',
+    borderlessTip: '使用 -popupwindow 启动无边框窗口，方便快速切屏切出。',
+    dx12Label: '启用 DirectX 12 运行',
+    dx12Tip: '使用 -force-d3d12 启动参数，支持开启光线追踪及帧生成（需显卡支持）。',
+    launchArgsLabel: '自定义启动命令行参数',
+    launchArgsTip: '例如: -popupwindow -screen-width 1920 -screen-height 1080',
+    fpsLabel: '帧率上限 (FPS)',
+    fps120Tip: '★ 120 FPS 将直接写入游戏注册表（游戏内原生上限仅为 60 帧）。',
+    renderScaleLabel: '渲染精度 (Render Scale)',
+    vsyncLabel: '垂直同步 (V-Sync)',
+    shadowQualityLabel: '阴影质量 (Shadow)',
+    lightQualityLabel: '光照质量 (Lighting)',
+    characterQualityLabel: '角色细节 (Character)',
+    envDetailLabel: '场景细节 (Environment)',
+    reflectionLabel: '反射质量 (Reflection)',
+    sfxQualityLabel: '特效质量 (SFX)',
+    bloomQualityLabel: '光晕效果 (Bloom)',
+    aaModeLabel: '抗锯齿模式 (Anti-Aliasing)',
+    dlssLabel: 'NVIDIA DLSS 质量',
+    saveAndApplyRegistry: '保存并写入注册表',
+    registrySuccessTip: '已成功将画质与分辨率写入系统注册表与启动配置！',
+    notSupportedGraphics: '高级注册表画质精修目前主要适配《崩坏：星穹铁道》及 Unity 内核游戏。',
+
     pkgModalTitle: '官方游戏安装包',
     pkgModalPreTitle: '预下载与游戏安装包',
     preDownloadTab: '预下载 (v{version})',
     fullGameTab: '完整客户端 (v{version})',
-    olderPatchesTab: '历史补丁 ({count})',
+    olderPatchesTab: '增量更新补丁 ({count})',
     preDownloadNotice: '✦ 官方已开启预下载！您可以提前下载更新资源，待维护结束后即可直接进入游戏。',
     directCdnNotice: '官方 CDN 直链下载地址（版本 {version}）：',
     patchesNotice: '旧版本增量补丁（Patch / HDiff）更新包：',

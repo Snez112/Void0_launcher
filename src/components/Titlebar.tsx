@@ -4,8 +4,6 @@ import {
   Minus,
   Square,
   X,
-  Volume2,
-  VolumeX,
   Globe,
   Languages,
   ChevronDown,
@@ -86,10 +84,10 @@ export const Titlebar: React.FC<TitlebarProps> = ({
     LANG_OPTIONS.find((l) => l.value === config.language)?.label || 'Ngôn ngữ';
 
   return (
-    <header className="titlebar" data-tauri-drag-region onMouseDown={handleMouseDown}>
+    <header className="titlebar" onMouseDown={handleMouseDown}>
       <div className="titlebar-brand" data-tauri-drag-region>
-        <img src="/icon.png" alt="Void0 Logo" className="titlebar-logo" />
-        <span>Void0 Launcher</span>
+        <img src="/icon.png" alt="AIO Launcher Logo" className="titlebar-logo" />
+        <span>AIO Launcher</span>
         <span className="brand-badge">{isEndfield ? 'GRYPHLINE' : 'HoyoPlay'}</span>
       </div>
 
@@ -163,28 +161,47 @@ export const Titlebar: React.FC<TitlebarProps> = ({
             </div>
           )}
         </div>
-
-        {/* Sound toggle */}
-        <button
-          className="win-btn"
-          title={config.soundEnabled ? t.soundMute : t.soundUnmute}
-          onClick={() => onChangeConfig({ ...config, soundEnabled: !config.soundEnabled })}
-        >
-          {config.soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-        </button>
       </div>
 
-      <div className="titlebar-controls">
-        <button className="win-btn" onClick={onOpenSettings} title={t.settingsTitle}>
-          <Settings size={15} />
-        </button>
-        <button className="win-btn" onClick={windowMinimize} title={t.minimizeTooltip}>
+      <div className="titlebar-controls" onMouseDown={(e) => e.stopPropagation()}>
+        {!isEndfield && (
+          <button
+            type="button"
+            className="win-btn"
+            onClick={onOpenSettings}
+            title={t.settingsTitle}
+          >
+            <Settings size={15} />
+          </button>
+        )}
+        <button
+          type="button"
+          className="win-btn"
+          onClick={() => {
+            windowMinimize();
+          }}
+          title={t.minimizeTooltip}
+        >
           <Minus size={15} />
         </button>
-        <button className="win-btn" onClick={windowToggleMaximize} title={t.maximizeTooltip}>
+        <button
+          type="button"
+          className="win-btn"
+          onClick={() => {
+            windowToggleMaximize();
+          }}
+          title={t.maximizeTooltip}
+        >
           <Square size={13} />
         </button>
-        <button className="win-btn close" onClick={windowClose} title={t.closeTooltip}>
+        <button
+          type="button"
+          className="win-btn close"
+          onClick={() => {
+            windowClose();
+          }}
+          title={t.closeTooltip}
+        >
           <X size={16} />
         </button>
       </div>

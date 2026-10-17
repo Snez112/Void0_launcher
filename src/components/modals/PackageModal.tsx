@@ -1,29 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, ExternalLink, Sparkles, Download, Layers } from 'lucide-react';
 import { HoyoGamePackageResult } from '../../types';
 import { getT } from '../../i18n/translations';
+import { getOfficialLauncherPath, openOfficialLauncher } from '../../services/nativeApi';
 
 interface PackageModalProps {
   packageData: HoyoGamePackageResult;
   language: string;
+  currentPath?: string;
+  gameBiz?: string;
   onClose: () => void;
 }
 
-export const PackageModal: React.FC<PackageModalProps> = ({ packageData, language, onClose }) => {
+export const PackageModal: React.FC<PackageModalProps> = ({
+  packageData,
+  language,
+  currentPath,
+  gameBiz,
+  onClose,
+}) => {
   const t = getT(language);
+  const isVi = language.toLowerCase().includes('vi');
+  const [launcherPath, setLauncherPath] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (currentPath && gameBiz) {
+      getOfficialLauncherPath(currentPath, gameBiz).then(setLauncherPath);
+    }
+  }, [currentPath, gameBiz]);
+
   const hasPre = Boolean(
     packageData.pre_download?.major ||
     (packageData.pre_download?.patches && packageData.pre_download.patches.length > 0)
   );
-  const [selectedTab, setSelectedTab] = useState<'main' | 'pre' | 'patch'>(hasPre ? 'pre' : 'main');
+
+  const availablePatches = hasPre
+    ? packageData.pre_download?.patches || []
+    : packageData.patches || [];
+
+  const defaultTab: 'main' | 'pre' | 'patch' = hasPre
+    ? 'pre'
+    : availablePatches.length > 0
+    ? 'patch'
+    : 'main';
+
+  const [selectedTab, setSelectedTab] = useState<'main' | 'pre' | 'patch'>(defaultTab);
 
   const currentPkg = selectedTab === 'pre'
     ? packageData.pre_download?.major || packageData.pre_download?.patches?.[0]
     : packageData.main;
 
-  const patches = selectedTab === 'pre'
-    ? packageData.pre_download?.patches || []
-    : packageData.patches || [];
+  const patches = availablePatches;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -39,6 +66,59 @@ export const PackageModal: React.FC<PackageModalProps> = ({ packageData, languag
             <X size={16} />
           </button>
         </div>
+
+        {/* Official launcher shortcut if detected */}
+        {launcherPath && (
+          <div
+            style={{
+              margin: '12px 16px 0 16px',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              background: 'rgba(234, 179, 8, 0.08)',
+              border: '1px solid rgba(234, 179, 8, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 16,
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#facc15', marginBottom: 3 }}>
+                {isVi ? 'Khuyến nghị: Cập nhật tự động qua Launcher gốc' : 'Recommended: Update via Official Launcher'}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                {isVi
+                  ? 'Launcher gốc sẽ tự động hợp nhất các file patch đã tải trước vào game nhanh chóng và chuẩn xác.'
+                  : 'The official launcher will merge the pre-downloaded patch into your game directory safely.'}
+              </div>
+            </div>
+            <button
+              className="btn-primary-play"
+              style={{
+                padding: '8px 16px',
+                fontSize: 12,
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+                height: 'auto',
+                background: 'linear-gradient(135deg, #eab308, #ca8a04)',
+                color: '#000',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                cursor: 'pointer',
+              }}
+              onClick={async () => {
+                if (currentPath && gameBiz) {
+                  await openOfficialLauncher(currentPath, gameBiz);
+                  onClose();
+                }
+              }}
+            >
+              <ExternalLink size={14} />
+              <span>{isVi ? 'Mở Launcher Gốc' : 'Open Official Launcher'}</span>
+            </button>
+          </div>
+        )}
 
         {/* Tab selection */}
         <div className="gacha-nav-tabs" style={{ padding: '8px 16px' }}>
